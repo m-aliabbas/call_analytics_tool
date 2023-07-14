@@ -17,20 +17,15 @@ class CallProcessor():
         Initialize CallProcessor with an optional keywords dictionary.
         """
 
-        if keywords is None:
-            self.keywords = {}
-        elif isinstance(keywords, dict):
-            self.keywords = keywords
-        else:
-            raise TypeError("keywords argument must be a dictionary")
         
+        self.keywords = keywords
         self.dict_list = []
         self.splitted_trans = {}
         self.splitted_df = {}
         self.full_transcript = {}
         self.sequence_dict = {}
 
-    def process_input(self,input_dict) -> tuple:
+    def process_input(self,input_dict,keywords=None) -> tuple:
         """
         Input dict from diarizaer response
         Processes the input dictionary by extracting the transcript and driving the analysis.
@@ -47,6 +42,8 @@ class CallProcessor():
                 sequence_dict(dict)
 
         """
+        if keywords is not None:
+            self.keywords = keywords
         file_name = input_dict['file_id']
         whole_data = input_dict
         self.dict_list = [whole_data]
@@ -123,6 +120,7 @@ class CallProcessor():
 if __name__ == "__main__":
     df_dict = pd.read_json('Example_Data/insurance.json').to_dict()
     keywords = extract_phrases(df_dict)
+    
     my_call_processor = CallProcessor(keywords=keywords)
     test_diarizer_response = {
         'file_id': '20220328-102401_6623727904-all',
