@@ -1,0 +1,53 @@
+.sidebar {
+    width: 273px;
+    height: 100vh;
+    background-color: #f1f1f1;
+    padding: 40px;
+ 
+  }
+  
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .sidebar ul li {
+    margin-bottom: 20px;
+    cursor: pointer;
+  }
+  
+  .sidebar ul ul {
+    margin-top: 10px;
+    margin-left: -120px;
+    
+  }
+  .logo{
+    font-size: 20pt;
+    font-weight: 800;
+    margin-bottom: 20%;
+
+  }
+  
+  .main-head a{
+   color: rgb(0, 0, 0);
+font-size: 14pt;
+font-weight: 600;
+
+  }
+  .sub-head a{
+    color: rgb(0, 0, 0);
+    font-size: 11pt;
+    font-weight: 500;
+  }
+
+  .main-head a:hover{
+    color: rgb(24, 0, 104);
+   }
+   .sub-head a:hover{
+    color: rgb(24, 0, 104);
+   }
+  
+   .main-head-icon{
+    margin-left: 5%;
+    margin-top: 1%;
+   }
