@@ -31,7 +31,7 @@ class Interface:
     def get_diarizer_response(self,diarizer_response={}):
         status=False
         msg='Went Wrong'
-        diarizer_response = get_diarizer_server_response()
+        diarizer_response = self.get_diarizer_server_response()
         splitted_trans,full_transcript,sequence_dict = self.call_processor.process_input(diarizer_response)
         
         file_id = list(splitted_trans.keys())[0]
