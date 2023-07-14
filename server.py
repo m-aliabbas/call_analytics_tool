@@ -7,6 +7,7 @@ from typing import List
 import ast
 from bson import json_util
 from fastapi.middleware.cors import CORSMiddleware
+import requests
 
 app = FastAPI()
 
@@ -62,12 +63,28 @@ def get_particular(file_id: str):
     json_data = parse_json(data)
     return json_data
 
+def get_diarizer_server_response(self,file_path):
+    # Specify the URL of the FastAPI server
+    url = 'http://110.93.240.107:8080/uploadfile/'
+    files = {'file': (file_path, open(file_path, 'rb'), 'audio/wav')}
 
+    # Send a POST request to the FastAPI server with the file data
+    response = requests.post(url, files=files)
+
+    # Check the response
+    if response.status_code == 200:
+        print('File uploaded successfully.')
+        resp_json = json.loads(response.text)
+        return True,resp_json
+    else:
+        print('Error occurred while uploading the file:', response.text)
+        return False,{}
+    
 @app.post("/uploadfiles/")
 async def create_upload_files(files: List[UploadFile] = File(...)):
     data = []
     for file in files:
         contents = await file.read()
         data.append({"filename": file.filename, "content": contents})
-        print('Yes')
+        
     return {"uploaded_files": 'Yes'}
