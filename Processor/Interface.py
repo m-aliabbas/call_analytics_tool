@@ -36,7 +36,7 @@ class Interface:
         
         file_id = list(splitted_trans.keys())[0]
         # splitted_trans[file_id]
-        data_to_save = {'file_id': file_id, 'spliited_trans':splitted_trans[file_id],'full_transcript':full_transcript[file_id],'sequence_dict':sequence_dict[file_id]}
+        data_to_save = {'file_id': file_id, 'spliited_trans':splitted_trans,'full_transcript':full_transcript,'sequence_dict':sequence_dict}
         print(data_to_save)
         status, msg = self.insert_to_db(data_to_save)
         return status,msg
@@ -60,15 +60,15 @@ class Interface:
         
     
     def get_full_transripts(self):
-        data = self.DB.find({},['full_transcript'])
+        data = self.DB.find({},['full_transcript','file_id'])
         return data
 
     def get_splitted_transcripts(self):
-        data = self.DB.find({},['spliited_trans'])
+        data = self.DB.find({},['spliited_trans','file_id'])
         return data
 
     def get_sequences(self):
-        data = self.DB.find({},['sequence_dict'])
+        data = self.DB.find({},['sequence_dict','file_id'])
         return data
 
     def get_particular_data(self,file_id):

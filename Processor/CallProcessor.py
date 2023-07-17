@@ -65,13 +65,14 @@ class CallProcessor():
                         local_trans.append(value["trascript"])
                         local_speaker.append(key.split("_")[1])
                 self.splitted_trans[file_id] = local_trans
+                local_speakers_dict1={file_id:local_speaker}
                 df = pd.DataFrame({"speaker":local_speaker, "transcript":local_trans})
                 self.splitted_df[file_id] = df
 
-            return self.splitted_trans
+            return {'splitted_transcript':self.splitted_trans,'speakers':local_speakers_dict1}
         except Exception as e:
             print(e)
-            return {}
+            return {'splitted_transcript':{'':[]},'speakers':{'':[]}}
             
     def get_full_transcript(self):
         # Creating a full transcript by joining the transcriptions from all speakers
