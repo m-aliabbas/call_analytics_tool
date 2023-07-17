@@ -9,6 +9,7 @@ from bson import json_util
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 import time
+import os
 
 app = FastAPI()
 
@@ -81,11 +82,48 @@ def get_diarizer_server_response(self,file_path):
         print('Error occurred while uploading the file:', response.text)
         return False,{}
     
+# @app.post("/uploadfiles/")
+# async def create_upload_files(files: List[UploadFile] = File(...)):
+#     data = []
+#     for file in files:
+#         contents = await file.read()
+#         data.append({"filename": file.filename, "content": contents})
+#         status,msg=get_diarizer_server_response(file.filename)
+#         if status:
+#             results = interface.get_diarizer_response()
+
+    
+#     return {"uploaded_files": 'Yes'}
+
+
+import os
+
 @app.post("/uploadfiles/")
 async def create_upload_files(files: List[UploadFile] = File(...)):
     data = []
     for file in files:
-        contents = await file.read()
-        data.append({"filename": file.filename, "content": contents})
-        
-    return {"uploaded_files": 'Yes'}
+        # Save the uploaded file
+        file_path = save_uploaded_file(file)
+        print(file_path)
+        status,msg = interface.get_diarizer_response(file_path)
+    return {'status': 'done'}
+
+
+def save_uploaded_file(file: UploadFile) -> str:
+    # Generate a unique filename to avoid conflicts
+    filename = file.filename
+    print(file.filename,1234)
+    # Define the directory to save the uploaded files
+    upload_dir = "./uploaded_files"
+
+    # Create the directory if it doesn't exist
+    os.makedirs(upload_dir, exist_ok=True)
+
+    # Save the file in the upload directory
+    file_path = os.path.join(upload_dir, filename)
+    with open(file_path, "wb") as f:
+        f.write(file.file.read())
+
+    return file_path
+
+

@@ -10,8 +10,6 @@ class LogAnalytics:
         self.class_count = 0
         self.call_drop = 0
         self.count_class = 0
-        self.fig = None
-        self.fig2 = None
         self.most_common_ngrams = []
         self.files = []
         self.content = []
@@ -23,11 +21,8 @@ class LogAnalytics:
         self.transcripts = []
         self.state_keywords = ['ello', 'ntro', 'nterested', 'AGE', 'Age', 'ransfer', 'achine', 'reeting', 'reetings', 'itch', 'OPT', 'arrier', 'panish', 'DNC', 'dnc', 'busy', 'Busy', 'ositive', 'egative', 'XFER', 'ualifies', 'ualified']
         self.number_data = {}
-        # print(self.state_keywords)
     
-
-
-
+ 
     def fileReader(self,file_name):
         path = (f'{os.getcwd}//files')
         try:
@@ -162,14 +157,9 @@ class LogAnalytics:
 
 
     def driver(self):
-        # file_names = st.file_uploader("Upload log file", accept_multiple_files = True)
-        # class_name = st.text_input("Class Name")
-        # disposition_button = st.button("Dispositions")
         file_names = ["20220830-134129_27843595-all_results"]
         class_name = "dnc"
         class_name = class_name.lower()
-        # for file_name in file_names:
-        #     self.fileReader(file_name.name)
         self.callSplitter()
         self.numberData()
         self.callCounter()
@@ -179,10 +169,6 @@ class LogAnalytics:
         self.countValidCalls()
         self.countClass(class_name)
         self.countMostUsedPharses()
-
-        # st.write(f"Total Calls: {self.total_calls}")
-        # st.write(f"Valid Calls: {self.valid_calls}")
-        # st.write(f"Total States: {self.count_class}")
 
 analaytics = LogAnalytics()
 analaytics.driver()

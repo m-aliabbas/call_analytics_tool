@@ -110,9 +110,15 @@ class CallProcessor():
     
     def driver(self,):
         # Driver function to execute the analysis steps
+        
+        self.splitted_trans = {}
+        self.splitted_df = {}
+        self.full_transcript = {}
+        self.sequence_dict = {}
         splitted_trans=self.get_splitted_transcript()
         full_transcript=self.get_full_transcript()
         sequence_dict = self.get_call_sequence()
+        self.dict_list = []
         return splitted_trans,full_transcript,sequence_dict
     
 

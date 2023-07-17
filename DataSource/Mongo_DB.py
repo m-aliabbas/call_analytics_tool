@@ -18,8 +18,8 @@ class Mongo_DB:
             return False
         return True
 
-    def find(self,file_id={},cols=[]):
-        if file_id is None:
+    def find(self,file_id=None,cols=[]):
+        if file_id is not None:
             return list(self.collection.find(file_id,cols))
         else:
             return list(self.collection.find({},cols))
