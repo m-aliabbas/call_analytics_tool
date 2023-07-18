@@ -1,6 +1,7 @@
 from typing import Union
 from fastapi import FastAPI
 from Processor.Interface import Interface
+from Processor.LogInterface import LogInterface
 import json
 from fastapi import FastAPI, UploadFile, File
 from typing import List
@@ -20,6 +21,7 @@ def parse_json(data):
 
 origins = ["*"]
 interface = Interface()
+LogInterface = LogInterface()
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -125,5 +127,16 @@ def save_uploaded_file(file: UploadFile) -> str:
         f.write(file.file.read())
 
     return file_path
+
+
+# Routes for logs
+
+
+@app.get("/get_full_log")
+def get_full_data():
+    data=LogInterface.get_complete_data()
+    data = {'data': data}
+    json_data = parse_json(data)
+    return json_data
 
 

@@ -9,7 +9,8 @@ class Mongo_DB:
         self.collection = self.mydb[collection_name]
     
     def insert(self,data):
-        file_id = data['file_id']
+        # file_id = data['file_id']
+        # files_id = "".join(self.data.keys())
         x = self.collection.insert_one(data)
         return x
     
