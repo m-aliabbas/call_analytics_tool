@@ -259,12 +259,12 @@ class LogAnalytics:
         self.none_separator()
         self.none_text_separator_2()
         self.numberData()
-        # # AI None Separater
-        # st.write(self.splitted_calls_3)
-        # # AI state list
-        # st.write(self.state_str)
-        # # AI none separator Counter
-        # st.write(len(self.none_calls_1))
+        # AI None Separater
+        st.write(self.splitted_calls_3)
+        # AI state list
+        st.write(self.state_str)
+        # AI none separator Counter
+        st.write(len(self.none_calls_1))
         self.total_calls = 0
         self.valid_calls = 0
         self.total_states = 0
