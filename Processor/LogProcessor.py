@@ -6,7 +6,7 @@ import sys
 import requests
 import json
 
-
+files_name = ["7C-D3-0A-1A-C3-78_1676679544.txt"]
 class LogAnalytics:
     def __init__(self):
         self.item_counts = None
@@ -20,6 +20,7 @@ class LogAnalytics:
         self.content = []
         self.files = []
         self.calls = []
+        self.none_calls = []
         self.state_str = []
         self.state_seq_call = []
         self.state_seq = []
@@ -27,24 +28,35 @@ class LogAnalytics:
         self.transcripts = []
         self.state_keywords = ['ello', 'ntro', 'nterested', 'AGE', 'Age', 'ransfer', 'achine', 'reeting', 'reetings', 'itch', 'OPT', 'arrier', 'panish', 'DNC', 'dnc', 'busy', 'Busy', 'ositive', 'egative', 'XFER', 'ualifies', 'ualified']
         self.number_data = {}
+        self.filings = str
 
 
-    def fileReader(self,file_name="7C-D3-0A-1A-C3-56_1676588618.txt"):
-        path = "E://Python Practice//disposition_classifier//files//"
-        try:
-            with open(os.path.join(path,file_name), "r") as file:
-                data = file.read()
-                # .decode("utf-8")
-                self.files.append(file_name)
-                self.content.append(data)
-        except FileNotFoundError:
-            print(f"file not found: {file_name}")
-        except IOError:
-            print(f"error occured while reading file: {file_name}")
+    def fileReader(self,file_name):
+        path = "E://Python Practice//call_analytics_tool//uploaded_files//"
+        for filing in file_name:
+            self.filings = filing
+            try:
+                with open(os.path.join(path,filing), "r") as file:
+                    data = file.read()
+                    # .decode("utf-8")
+                    self.files.append(filing)
+                    self.content.append(data)
+            except FileNotFoundError:
+                print(f"file not found: {filing}")
+            except IOError:
+                print(f"error occured while reading file: {filing}")
 
 
+    def none_separator(self):
+        for callContent in self.content:
+            if "AI bot level= 2 : None" in callContent:
+                print("hello's level")
+                splitted_calls = callContent.split("AI bot level= 2 : None")
+                for call in splitted_calls:
+                    self.none_calls.append(call)
+
+                
     def callSplitter(self):
-        
         for callContent in self.content:
             if "call ended!!!" in callContent:
                 splitted_calls = callContent.split("call ended!!!")
@@ -84,7 +96,7 @@ class LogAnalytics:
 
         # Display in One Dataframe
         try:
-            df_number_data = {"file_id":number,"Caller_ID":{number:numbers}, "Transcript":{number:number_trans}, "Disposition":{number:number_dis}, "total_calls":self.total_calls, "valid_calls":self.valid_calls, "total_states": self.total_states, "call_drop": self.call_drop }
+            df_number_data = {"file_id":self.filings,"Caller_ID":{self.filings:numbers}, "Transcript":{self.filings:number_trans}, "Disposition":{self.filings:number_dis}, "total_calls":self.total_calls, "valid_calls":self.valid_calls, "total_states": self.count_class, "call_drop": self.call_drop }
             self.number_data = df_number_data       
         except:
             pass 
@@ -173,9 +185,9 @@ class LogAnalytics:
         self.most_common_ngrams = ngrams.most_common(5)
 
 
-    def driver(self):
+    def driver(self,files_name):
         class_name = ""
-        self.fileReader()
+        self.fileReader(files_name)
         self.callSplitter()
         self.callCounter()
         self.getStates()
@@ -185,11 +197,23 @@ class LogAnalytics:
         self.countClass(class_name)
         self.countMostUsedPharses()
         self.numberData()
-
+        print(self.none_calls)
+        self.total_calls = 0
+        self.valid_calls = 0
+        self.total_states = 0
+        self.class_count = 0
+        self.call_drop = 0
+        self.count_class = 0
+        self.most_common_ngrams = []
+        self.content = []
+        self.files = []
+        self.calls = []
+        self.state_str = []
+        self.state_seq_call = []
+        self.state_seq = []
+        self.trans_list = []
+        self.transcripts = []
         return self.number_data
     
-if __name__ == "__main__":        
-    LogProcessor = LogAnalytics()
-    number_data = LogProcessor.driver()
-
-    print('\n-----Dictionary to save-----\n',number_data,)
+logsinterfaces = LogAnalytics()
+logsinterfaces.driver(files_name)
