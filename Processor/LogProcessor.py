@@ -6,6 +6,7 @@ import sys
 import requests
 import json
 from zipfile import ZipFile
+import streamlit as st
 
 files_name = ["7C-D3-0A-1A-C3-78_1676679544.txt"]
 file_names= ["zipper.zip"]
@@ -154,7 +155,7 @@ class LogAnalytics:
 
         # Display in One Dataframe
         try:
-            df_number_data = {"file_id":self.filings,"Caller_ID":{self.filings:numbers}, "Transcript":{self.filings:number_trans}, "AI None Separater":{self.filings:self.splitted_calls_3}, "Disposition":{self.filings:number_dis},"State list":{self.filings:self.state_str}, "AI None Separater Counter":len(self.none_calls_1), "total_calls":self.total_calls, "valid_calls":self.valid_calls, "total_states": self.count_class, "call_drop": self.call_drop }
+            df_number_data = {"file_id":self.filings,"Caller_ID":{self.filings:numbers}, "Transcript":{self.filings:number_trans}, "Disposition":{self.filings:number_dis}, "AI None Separater":{self.filings:self.splitted_calls_3},"State list":{self.filings:self.state_str}, "AI None Separater Counter":len(self.none_calls_1), "total_calls":self.total_calls, "valid_calls":self.valid_calls, "total_states": self.count_class, "call_drop": self.call_drop }
             self.number_data = df_number_data       
         except:
             pass 
@@ -255,9 +256,15 @@ class LogAnalytics:
         self.countValidCalls()
         self.countClass(class_name)
         self.countMostUsedPharses()
-        self.numberData()
         self.none_separator()
         self.none_text_separator_2()
+        self.numberData()
+        # # AI None Separater
+        # st.write(self.splitted_calls_3)
+        # # AI state list
+        # st.write(self.state_str)
+        # # AI none separator Counter
+        # st.write(len(self.none_calls_1))
         self.total_calls = 0
         self.valid_calls = 0
         self.total_states = 0
@@ -273,6 +280,7 @@ class LogAnalytics:
         self.state_seq = []
         self.trans_list = []
         self.transcripts = []
+        print(self.number_data)
         return self.number_data
     
 logsinterfaces = LogAnalytics()
