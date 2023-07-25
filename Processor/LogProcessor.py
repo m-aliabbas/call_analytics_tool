@@ -5,6 +5,7 @@ from collections import Counter
 import sys
 import requests
 import json
+import re
 from zipfile import ZipFile
 import streamlit as st
 
@@ -36,6 +37,7 @@ class LogAnalytics:
         self.filings = str
         self.filers_name = []
         self.splitted_calls_3 = []
+        self.df = ""
 
     def zip_extractor(self,file_names):     
         path = "E://Python Practice//call_analytics_tool//uploaded_files//"    
@@ -43,12 +45,12 @@ class LogAnalytics:
         for filing in file_names:
             with ZipFile(os.path.join(path,filing), 'r') as zip:
                 # printing all the contents of the zip file
-                zip.printdir()
+                # zip.printdir()
             
                 # extracting all the files
-                print('Extracting all the files now...')
+                # print('Extracting all the files now...')
                 zip.extractall()
-                print('Done!')
+                # print('Done!')
 
     def fileReader(self,file_name):
         path = "E://Python Practice//call_analytics_tool//uploaded_files//"
@@ -65,56 +67,71 @@ class LogAnalytics:
             except IOError:
                 print(f"error occured while reading file: {filing}")
 
-    
-    # def find_text_between_words(self, input_string, word1, word2):
-    #     # Create a regular expression pattern to find the text between the two words
-    #     pattern = r'{}(.*?){}'.format(re.escape(word1), re.escape(word2))
-
-    #     # Search for matches using the regular expression
-    #     matches = re.findall(pattern, input_string)
-
-    #     return matches
-    
-
-    # def find_between(self, s, first, last ):
-    #     try:
-    #         start = s.index( first ) + len( first )
-    #         end = s.index( last, start )
-    #         return s[start:end]
-    #     except ValueError:
-    #         return ""
-
 
     def none_separator(self):
-        for callContent in self.content:
-            if "AI bot level= 2 : None" in callContent:
-                splitted_calls_1 = callContent.split("AI bot level= 1 : None")
-                splitted_calls_2 = callContent.split("AI bot level= 2 : None") 
-
-                for call in splitted_calls_1:
-                    self.none_calls_1.append(call)
-                for call in splitted_calls_2:
-                    self.none_calls_2.append(call)
-
-
-
-    def none_text_separator_2(self):
-        '''
-        to extract number data ... 
-        I made some changes and comment for that. 
+        results = []
+        result = {}
         
-        '''
-       
-        for call_index,call in enumerate(self.calls):
-            number_transcript = [] #every time we make a transcript list
-            if "AI bot got this data =" in call:
-                splited_lines = call.splitlines()
-                for line_index,line in enumerate(splited_lines):
-                    if "AI bot got this data =" in line:
-                        text = line.split("=")[1]
-                        number_transcript.append(text)
-                self.splitted_calls_3.append(number_transcript[0]) # getting only first Index of Transcript list
-                
+        states_to_find = ["DNC", "Not Interested", "Ans Machine","Hang Up","Not Qualified","Negative","Positive", "Transfer","Bot Hanged UP","No Answer","Caller Hanged Up"]
+        phone_num = '123'
+        for callContent in self.content:
+            if "AI bot level= 2 : None" and "AI bot got this data" in callContent:
+                splitted_calls_2 = callContent.split('\n')
+                for i in range(len(splitted_calls_2)):
+                    line = splitted_calls_2[i]
+
+                    # Detect phone number
+                    phone_num_match = re.search(r"Incoming: \((\d{3})\)(\d{3})-(\d{4})", line)
+                    if phone_num_match:
+                        phone_num = phone_num_match.group(0).split(':')[1].strip()
+                        result['Phone Number'] = phone_num_match.group(0).split(':')[1].strip()
+                    
+                    # Detect AI bot data
+                    ai_bot_match = re.search(r"AI bot got this data = (.*)", line)
+                    if ai_bot_match:
+                        result['AI bot got this data'] = ai_bot_match.group(1)
+
+                    
+                    # Detect AI bot level
+                    ai_bot_level_match = re.search(r"AI bot level= 1 : None", line)
+                    if ai_bot_level_match:
+                        result['AI bot level'] = ai_bot_level_match.group(0)
+                        for j in range(i+1, min(i+5, len(splitted_calls_2))):
+                            next_line = splitted_calls_2[j]
+                            if 'playing' in next_line:
+                                continue
+                        j = i+1
+                        next_line = splitted_calls_2[min(j, len(splitted_calls_2)-1)]
+                        result['Next State'] = []
+                        token = False
+                        while 'call started' not in next_line:
+                            for state in states_to_find:
+                                if state in next_line:
+                                    result['Next State'] += [state]
+                                    break
+                            if j >= len(splitted_calls_2):
+                                print(True)
+                                break
+                            j += 1
+                            next_line= splitted_calls_2[min(j, len(splitted_calls_2)-1)]
+                        result['Phone Number'] = phone_num
+                        result['Next State'] = list(set(result['Next State']))    
+                        results.append(result.copy())  # Save this result
+                        result = {}  # Clear for next potential result
+                                    
+                for result in results:
+                    print(result)
+
+                if len(results) > 0:
+                    df = pd.DataFrame(results)
+                    self.df = df
+                    st.write(df)
+                    # df = df.dropna()
+                    # df.to_csv(f'{file_name[:-4]}_processed.csv', index=False)
+                else:
+                    print(f"No results found in")
+
+                    
     def callSplitter(self):
         for callContent in self.content:
             if "call ended!!!" in callContent:
@@ -155,7 +172,7 @@ class LogAnalytics:
 
         # Display in One Dataframe
         try:
-            df_number_data = {"file_id":self.filings,"Caller_ID":{self.filings:numbers}, "Transcript":{self.filings:number_trans}, "Disposition":{self.filings:number_dis}, "AI None Separater":{self.filings:self.splitted_calls_3},"State list":{self.filings:self.state_str}, "AI None Separater Counter":len(self.none_calls_1), "total_calls":self.total_calls, "valid_calls":self.valid_calls, "total_states": self.count_class, "call_drop": self.call_drop }
+            df_number_data = {"file_id":self.filings,"Caller_ID":{self.filings:numbers}, "Transcript":{self.filings:number_trans}, "Disposition":{self.filings:number_dis}, "AI None Separater":{self.filings:self.df}, "total_calls":self.total_calls, "valid_calls":self.valid_calls, "total_states": self.count_class, "call_drop": self.call_drop }
             self.number_data = df_number_data       
         except:
             pass 
@@ -257,14 +274,7 @@ class LogAnalytics:
         self.countClass(class_name)
         self.countMostUsedPharses()
         self.none_separator()
-        self.none_text_separator_2()
         self.numberData()
-        # AI None Separater
-        st.write(self.splitted_calls_3)
-        # AI state list
-        st.write(self.state_str)
-        # AI none separator Counter
-        st.write(len(self.none_calls_1))
         self.total_calls = 0
         self.valid_calls = 0
         self.total_states = 0
@@ -280,7 +290,6 @@ class LogAnalytics:
         self.state_seq = []
         self.trans_list = []
         self.transcripts = []
-        print(self.number_data)
         return self.number_data
     
 logsinterfaces = LogAnalytics()
