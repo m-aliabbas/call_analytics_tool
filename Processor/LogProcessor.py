@@ -9,9 +9,9 @@ import re
 from zipfile import ZipFile
 import streamlit as st
 
-files_name = ["7C-D3-0A-1A-D3-CF_1676509884.txt"]
-file_names= ["zipper.zip"]
-file_name = '7C-D3-0A-1A-D3-CF_1676509884.txt'
+# files_name = ["7C-D3-0A-1A-C3-C4_1676679530.txt"]
+# file_names= ["zipper.zip"]
+# file_name = '7C-D3-0A-1A-C3-C4_1676679530.txt'
 class LogAnalytics:
     def __init__(self):
         self.item_counts = None
@@ -38,7 +38,7 @@ class LogAnalytics:
         self.filings = str
         self.filers_name = []
         self.splitted_calls_3 = []
-        self.path = "E://Python Practice//call_analytics_tool//uploaded_files//"
+        self.path = ""
         self.state_dict = {
             "playing hello": "hello",
             "playing intro": "intro",
@@ -54,7 +54,7 @@ class LogAnalytics:
         self.mergerd_dict = {}
 
     def zip_extractor(self,file_names):     
-        path = "E://Python Practice//call_analytics_tool//uploaded_files//"    
+        path = ""    
         # opening the zip file in READ mode
         for filing in file_names:
             with ZipFile(os.path.join(path,filing), 'r') as zip:
@@ -220,16 +220,16 @@ class LogAnalytics:
                 result['Next State'] = list(set(result['Next State']))    
                 results.append(result.copy())  # Save this result
                 result = {}  # Clear for next potential result
-
-        for result in results:
-            print(result)
-
+        
+        print(len(results))
         if len(results) > 0:
-            df = pd.DataFrame(results)
-            st.dataframe(df)
+
+            self.df_temp = pd.DataFrame(results)
+            # st.dataframe(df)
             # df = df.dropna()
-            df.to_csv(f'{file_name[:-4]}_processed.csv', index=False)
+            # df.to_csv(f'{file_name[:-4]}_processed.csv', index=False)
         else:
+            self.df_temp = pd.DataFrame()
             print(f"No results found in {file_name}")
 
 
@@ -262,18 +262,10 @@ class LogAnalytics:
 
         # Convert to DataFrame
         df = pd.DataFrame(rows)
+ 
 
-        # Show DataFrame 
-        print(df)
-
-        df2= pd.read_csv(os.path.join(self.path,'7C-D3-0A-1A-D3-CF_1676509884_processed.csv'))
-
-        merged_df = df2.merge(df, on='Phone Number', how='inner')
-
-        merged_df.head(15)
-
+        merged_df = self.df_temp.merge(df, on='Phone Number', how='inner')
         merged_dict_temp=merged_df.to_dict('records')
-
         self.mergerd_dict = merged_dict_temp
 
 
@@ -308,7 +300,7 @@ class LogAnalytics:
                         number_dis.append(disposition)
                 
                 number_trans.append(number_transcript[0]) # getting only first Index of Transcript list
-        st.write(self.mergerd_dict)
+
         # Display in One Dataframe
         try:
             df_number_data = {"file_id":self.filings,"Caller_ID":{self.filings:numbers}, "Transcript":{self.filings:number_trans}, "Disposition":{self.filings:number_dis}, "AI None Separater":{self.filings:self.mergerd_dict}, "total_calls":self.total_calls, "valid_calls":self.valid_calls, "total_states": self.count_class, "call_drop": self.call_drop }
@@ -319,7 +311,7 @@ class LogAnalytics:
 
     def driver(self,files_name):
         class_name = ""
-        self.zip_extractor(file_names)        
+        # self.zip_extractor(file_names)        
         self.fileReader(files_name)
         self.callSplitter()
         self.callCounter()
@@ -332,6 +324,8 @@ class LogAnalytics:
         self.none_separator_1()
         self.none_separator_2()
         self.numberData()
+        self.df_temp = pd.DataFrame()
+        self.mergerd_dict = {}
         self.total_calls = 0
         self.valid_calls = 0
         self.total_states = 0
@@ -356,5 +350,3 @@ class LogAnalytics:
 
         return self.number_data
     
-logsinterfaces = LogAnalytics()
-logsinterfaces.driver(files_name)
