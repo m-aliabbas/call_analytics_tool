@@ -9,8 +9,9 @@ import re
 from zipfile import ZipFile
 import streamlit as st
 
-files_name = ["7C-D3-0A-1A-C3-78_1676679544.txt"]
+files_name = ["7C-D3-0A-1A-D3-CF_1676509884.txt"]
 file_names= ["zipper.zip"]
+file_name = '7C-D3-0A-1A-D3-CF_1676509884.txt'
 class LogAnalytics:
     def __init__(self):
         self.item_counts = None
@@ -37,7 +38,19 @@ class LogAnalytics:
         self.filings = str
         self.filers_name = []
         self.splitted_calls_3 = []
+        self.path = "E://Python Practice//call_analytics_tool//uploaded_files//"
+        self.state_dict = {
+            "playing hello": "hello",
+            "playing intro": "intro",
+            "playing Pitch OPT": "pitch",
+            "No Answer": "no_answer",
+            "Hang Up": "hang_up",
+            "Caller Hanged Up": "caller_hanged_up",
+            "Bot Hanged Up": "bot_hanged_up",
+            "DNC": "dnc",
+        }
         self.df = ""
+        self.data =""
 
     def zip_extractor(self,file_names):     
         path = "E://Python Practice//call_analytics_tool//uploaded_files//"    
@@ -53,85 +66,124 @@ class LogAnalytics:
                 # print('Done!')
 
     def fileReader(self,file_name):
-        path = "E://Python Practice//call_analytics_tool//uploaded_files//"
+        
         for filing in file_name:
             self.filings = filing
             try:
-                with open(os.path.join(path,filing), "r") as file:
-                    data = file.read()
+                with open(os.path.join(self.path,filing), "r") as file:
+                    self.data = file.read()
                     # .decode("utf-8")
                     self.files.append(filing)
-                    self.content.append(data)
+                    self.content.append(self.data)
             except FileNotFoundError:
                 print(f"file not found: {filing}")
             except IOError:
                 print(f"error occured while reading file: {filing}")
 
 
-    def none_separator(self):
+    def none_separator(self,):
+        # Split the data by call start
+        calls = self.data.split('call started')
+
+        rows = []
+
+        # For each call
+        for call in calls[1:]:  # The first split is empty
+            row = {}
+
+            # Find phone number
+            phone_num_match = re.search(r"Incoming: \((\d{3})\)(\d{3})-(\d{4})",call)
+            if phone_num_match:
+                phone_num = phone_num_match.group(0).split(':')[1].strip()
+                row['Phone Number'] = phone_num_match.group(0).split(':')[1].strip()
+            
+            # States
+            states = []
+            for line in call.split("\n"):
+                for state in self.state_dict:
+                    if state in line:
+                        states.append(self.state_dict[state])
+            row['states'] = ', '.join(states)
+
+            # Append to the rows
+            rows.append(row)
+
+        # Convert to DataFrame
+        df = pd.DataFrame(rows)
+
+        # Show DataFrame 
+        print(df)
+
+        df2= pd.read_csv(os.path.join(self.path,'7C-D3-0A-1A-D3-CF_1676509884_processed.csv'))
+
+        merged_df = df2.merge(df, on='Phone Number', how='inner')
+
+        merged_df.head(15)
+
+        merged_dict_temp=merged_df.to_dict('records')
+
+        st.write(merged_dict_temp)
+
+
+    def none_separator_2(self,):
+        data_lines = self.data.split('\n')
         results = []
         result = {}
-        
+        # "DNC", "Not Interested", "Ans Machine", "Transfer",
         states_to_find = ["DNC", "Not Interested", "Ans Machine","Hang Up","Not Qualified","Negative","Positive", "Transfer","Bot Hanged UP","No Answer","Caller Hanged Up"]
         phone_num = '123'
-        for callContent in self.content:
-            if "AI bot level= 2 : None" and "AI bot got this data" in callContent:
-                splitted_calls_2 = callContent.split('\n')
-                for i in range(len(splitted_calls_2)):
-                    line = splitted_calls_2[i]
+        for i in range(len(data_lines)):
+            line = data_lines[i]
 
-                    # Detect phone number
-                    phone_num_match = re.search(r"Incoming: \((\d{3})\)(\d{3})-(\d{4})", line)
-                    if phone_num_match:
-                        phone_num = phone_num_match.group(0).split(':')[1].strip()
-                        result['Phone Number'] = phone_num_match.group(0).split(':')[1].strip()
-                    
-                    # Detect AI bot data
-                    ai_bot_match = re.search(r"AI bot got this data = (.*)", line)
-                    if ai_bot_match:
-                        result['AI bot got this data'] = ai_bot_match.group(1)
+            # Detect phone number
+            phone_num_match = re.search(r"Incoming: \((\d{3})\)(\d{3})-(\d{4})", line)
+            if phone_num_match:
+                phone_num = phone_num_match.group(0).split(':')[1].strip()
+                result['Phone Number'] = phone_num_match.group(0).split(':')[1].strip()
 
-                    
-                    # Detect AI bot level
-                    ai_bot_level_match = re.search(r"AI bot level= 1 : None", line)
-                    if ai_bot_level_match:
-                        result['AI bot level'] = ai_bot_level_match.group(0)
-                        for j in range(i+1, min(i+5, len(splitted_calls_2))):
-                            next_line = splitted_calls_2[j]
-                            if 'playing' in next_line:
-                                continue
-                        j = i+1
-                        next_line = splitted_calls_2[min(j, len(splitted_calls_2)-1)]
-                        result['Next State'] = []
-                        token = False
-                        while 'call started' not in next_line:
-                            for state in states_to_find:
-                                if state in next_line:
-                                    result['Next State'] += [state]
-                                    break
-                            if j >= len(splitted_calls_2):
-                                print(True)
-                                break
-                            j += 1
-                            next_line= splitted_calls_2[min(j, len(splitted_calls_2)-1)]
-                        result['Phone Number'] = phone_num
-                        result['Next State'] = list(set(result['Next State']))    
-                        results.append(result.copy())  # Save this result
-                        result = {}  # Clear for next potential result
-                                    
-                for result in results:
-                    print(result)
+            # Detect AI bot data
+            ai_bot_match = re.search(r"AI bot got this data = (.*)", line)
+            if ai_bot_match:
+                result['AI bot got this data'] = ai_bot_match.group(1)
 
-                if len(results) > 0:
-                    df = pd.DataFrame(results)
-                    self.df = df
-                    st.write(df)
-                    # df = df.dropna()
-                    # df.to_csv(f'{file_name[:-4]}_processed.csv', index=False)
-                else:
-                    print(f"No results found in")
+            # Detect AI bot level
+            ai_bot_level_match = re.search(r"AI bot level= 1 : None", line)
+            if ai_bot_level_match:
+                result['AI bot level'] = ai_bot_level_match.group(0)
+                for j in range(i+1, min(i+5, len(data_lines))):
+                    next_line = data_lines[j]
+                    if 'playing' in next_line:
+                        continue
+                j = i+1
+                next_line = data_lines[min(j, len(data_lines)-1)]
+                result['Next State'] = []
+                token = False
+                while 'call started' not in next_line:
+                    for state in states_to_find:
+                        if state in next_line:
+                            result['Next State'] += [state]
+                            break
+                    if j >= len(data_lines):
+                        print(True)
+                        break
+                    j += 1
+                    next_line= data_lines[min(j, len(data_lines)-1)]
+                result['Phone Number'] = phone_num
+                result['Next State'] = list(set(result['Next State']))    
+                results.append(result.copy())  # Save this result
+                result = {}  # Clear for next potential result
 
-                    
+        for result in results:
+            print(result)
+
+        if len(results) > 0:
+            df = pd.DataFrame(results)
+            st.dataframe(df)
+            # df = df.dropna()
+            df.to_csv(f'{file_name[:-4]}_processed.csv', index=False)
+        else:
+            print(f"No results found in {file_name}")
+
     def callSplitter(self):
         for callContent in self.content:
             if "call ended!!!" in callContent:
@@ -273,6 +325,7 @@ class LogAnalytics:
         self.countValidCalls()
         self.countClass(class_name)
         self.countMostUsedPharses()
+        self.none_separator_2()
         self.none_separator()
         self.numberData()
         self.total_calls = 0
