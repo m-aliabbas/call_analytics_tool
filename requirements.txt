@@ -1,3 +1,10 @@
 mysql.connector
 pandas
 pymongo
+os
+re
+sys
+requests
+json
+re
+streamlit

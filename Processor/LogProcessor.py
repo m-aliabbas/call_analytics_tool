@@ -51,6 +51,7 @@ class LogAnalytics:
         }
         self.df = ""
         self.data =""
+        self.mergerd_dict = {}
 
     def zip_extractor(self,file_names):     
         path = "E://Python Practice//call_analytics_tool//uploaded_files//"    
@@ -81,153 +82,12 @@ class LogAnalytics:
                 print(f"error occured while reading file: {filing}")
 
 
-    def none_separator(self,):
-        # Split the data by call start
-        calls = self.data.split('call started')
-
-        rows = []
-
-        # For each call
-        for call in calls[1:]:  # The first split is empty
-            row = {}
-
-            # Find phone number
-            phone_num_match = re.search(r"Incoming: \((\d{3})\)(\d{3})-(\d{4})",call)
-            if phone_num_match:
-                phone_num = phone_num_match.group(0).split(':')[1].strip()
-                row['Phone Number'] = phone_num_match.group(0).split(':')[1].strip()
-            
-            # States
-            states = []
-            for line in call.split("\n"):
-                for state in self.state_dict:
-                    if state in line:
-                        states.append(self.state_dict[state])
-            row['states'] = ', '.join(states)
-
-            # Append to the rows
-            rows.append(row)
-
-        # Convert to DataFrame
-        df = pd.DataFrame(rows)
-
-        # Show DataFrame 
-        print(df)
-
-        df2= pd.read_csv(os.path.join(self.path,'7C-D3-0A-1A-D3-CF_1676509884_processed.csv'))
-
-        merged_df = df2.merge(df, on='Phone Number', how='inner')
-
-        merged_df.head(15)
-
-        merged_dict_temp=merged_df.to_dict('records')
-
-        st.write(merged_dict_temp)
-
-
-    def none_separator_2(self,):
-        data_lines = self.data.split('\n')
-        results = []
-        result = {}
-        # "DNC", "Not Interested", "Ans Machine", "Transfer",
-        states_to_find = ["DNC", "Not Interested", "Ans Machine","Hang Up","Not Qualified","Negative","Positive", "Transfer","Bot Hanged UP","No Answer","Caller Hanged Up"]
-        phone_num = '123'
-        for i in range(len(data_lines)):
-            line = data_lines[i]
-
-            # Detect phone number
-            phone_num_match = re.search(r"Incoming: \((\d{3})\)(\d{3})-(\d{4})", line)
-            if phone_num_match:
-                phone_num = phone_num_match.group(0).split(':')[1].strip()
-                result['Phone Number'] = phone_num_match.group(0).split(':')[1].strip()
-
-            # Detect AI bot data
-            ai_bot_match = re.search(r"AI bot got this data = (.*)", line)
-            if ai_bot_match:
-                result['AI bot got this data'] = ai_bot_match.group(1)
-
-            # Detect AI bot level
-            ai_bot_level_match = re.search(r"AI bot level= 1 : None", line)
-            if ai_bot_level_match:
-                result['AI bot level'] = ai_bot_level_match.group(0)
-                for j in range(i+1, min(i+5, len(data_lines))):
-                    next_line = data_lines[j]
-                    if 'playing' in next_line:
-                        continue
-                j = i+1
-                next_line = data_lines[min(j, len(data_lines)-1)]
-                result['Next State'] = []
-                token = False
-                while 'call started' not in next_line:
-                    for state in states_to_find:
-                        if state in next_line:
-                            result['Next State'] += [state]
-                            break
-                    if j >= len(data_lines):
-                        print(True)
-                        break
-                    j += 1
-                    next_line= data_lines[min(j, len(data_lines)-1)]
-                result['Phone Number'] = phone_num
-                result['Next State'] = list(set(result['Next State']))    
-                results.append(result.copy())  # Save this result
-                result = {}  # Clear for next potential result
-
-        for result in results:
-            print(result)
-
-        if len(results) > 0:
-            df = pd.DataFrame(results)
-            st.dataframe(df)
-            # df = df.dropna()
-            df.to_csv(f'{file_name[:-4]}_processed.csv', index=False)
-        else:
-            print(f"No results found in {file_name}")
-
     def callSplitter(self):
         for callContent in self.content:
             if "call ended!!!" in callContent:
                 splitted_calls = callContent.split("call ended!!!")
                 for call in splitted_calls:
                     self.calls.append(call)
-
-
-    def numberData(self):
-        '''
-        to extract number data ... 
-        I made some changes and comment for that. 
-        
-        '''
-        number_trans = []
-        number_dis   = []
-        numbers = []
-       
-        for call_index,call in enumerate(self.calls):
-
-            number_transcript = [] #every time we make a transcript list
-            if "AI bot got this data =" in call and "Incoming:" in call and "Disposition =" in call:
-                splited_lines = call.splitlines()
-                
-                for line_index,line in enumerate(splited_lines):
-                    if "Incoming:" in line:
-                        number = line.split(" ")[1]
-                        numbers.append(number)
-                    if "AI bot got this data =" in line:
-                        text = line.split("=")[1]
-                        number_transcript.append(text)
-                    if  "Disposition =" in line:
-                        disposition = line.split("=")[1]
-                        disposition = disposition[:-19] # remove the line containing slowing with 2sec etc (By. ALI)
-                        number_dis.append(disposition)
-                
-                number_trans.append(number_transcript[0]) # getting only first Index of Transcript list
-
-        # Display in One Dataframe
-        try:
-            df_number_data = {"file_id":self.filings,"Caller_ID":{self.filings:numbers}, "Transcript":{self.filings:number_trans}, "Disposition":{self.filings:number_dis}, "AI None Separater":{self.filings:self.df}, "total_calls":self.total_calls, "valid_calls":self.valid_calls, "total_states": self.count_class, "call_drop": self.call_drop }
-            self.number_data = df_number_data       
-        except:
-            pass 
 
 
     def callCounter(self):
@@ -313,6 +173,150 @@ class LogAnalytics:
         self.most_common_ngrams = ngrams.most_common(5)
 
 
+    def none_separator_1(self,):
+        data_lines = self.data.split('\n')
+        results = []
+        result = {}
+        # "DNC", "Not Interested", "Ans Machine", "Transfer",
+        states_to_find = ["DNC", "Not Interested", "Ans Machine","Hang Up","Not Qualified","Negative","Positive", "Transfer","Bot Hanged UP","No Answer","Caller Hanged Up"]
+        phone_num = '123'
+        for i in range(len(data_lines)):
+            line = data_lines[i]
+
+            # Detect phone number
+            phone_num_match = re.search(r"Incoming: \((\d{3})\)(\d{3})-(\d{4})", line)
+            if phone_num_match:
+                phone_num = phone_num_match.group(0).split(':')[1].strip()
+                result['Phone Number'] = phone_num_match.group(0).split(':')[1].strip()
+
+            # Detect AI bot data
+            ai_bot_match = re.search(r"AI bot got this data = (.*)", line)
+            if ai_bot_match:
+                result['AI bot got this data'] = ai_bot_match.group(1)
+
+            # Detect AI bot level
+            ai_bot_level_match = re.search(r"AI bot level= 1 : None", line)
+            if ai_bot_level_match:
+                result['AI bot level'] = ai_bot_level_match.group(0)
+                for j in range(i+1, min(i+5, len(data_lines))):
+                    next_line = data_lines[j]
+                    if 'playing' in next_line:
+                        continue
+                j = i+1
+                next_line = data_lines[min(j, len(data_lines)-1)]
+                result['Next State'] = []
+                token = False
+                while 'call started' not in next_line:
+                    for state in states_to_find:
+                        if state in next_line:
+                            result['Next State'] += [state]
+                            break
+                    if j >= len(data_lines):
+                        print(True)
+                        break
+                    j += 1
+                    next_line= data_lines[min(j, len(data_lines)-1)]
+                result['Phone Number'] = phone_num
+                result['Next State'] = list(set(result['Next State']))    
+                results.append(result.copy())  # Save this result
+                result = {}  # Clear for next potential result
+
+        for result in results:
+            print(result)
+
+        if len(results) > 0:
+            df = pd.DataFrame(results)
+            st.dataframe(df)
+            # df = df.dropna()
+            df.to_csv(f'{file_name[:-4]}_processed.csv', index=False)
+        else:
+            print(f"No results found in {file_name}")
+
+
+    def none_separator_2(self,):
+        # Split the data by call start
+        calls = self.data.split('call started')
+
+        rows = []
+
+        # For each call
+        for call in calls[1:]:  # The first split is empty
+            row = {}
+
+            # Find phone number
+            phone_num_match = re.search(r"Incoming: \((\d{3})\)(\d{3})-(\d{4})",call)
+            if phone_num_match:
+                phone_num = phone_num_match.group(0).split(':')[1].strip()
+                row['Phone Number'] = phone_num_match.group(0).split(':')[1].strip()
+            
+            # States
+            states = []
+            for line in call.split("\n"):
+                for state in self.state_dict:
+                    if state in line:
+                        states.append(self.state_dict[state])
+            row['states'] = ', '.join(states)
+
+            # Append to the rows
+            rows.append(row)
+
+        # Convert to DataFrame
+        df = pd.DataFrame(rows)
+
+        # Show DataFrame 
+        print(df)
+
+        df2= pd.read_csv(os.path.join(self.path,'7C-D3-0A-1A-D3-CF_1676509884_processed.csv'))
+
+        merged_df = df2.merge(df, on='Phone Number', how='inner')
+
+        merged_df.head(15)
+
+        merged_dict_temp=merged_df.to_dict('records')
+
+        self.mergerd_dict = merged_dict_temp
+
+
+
+
+    def numberData(self):
+        '''
+        to extract number data ... 
+        I made some changes and comment for that. 
+        
+        '''
+        number_trans = []
+        number_dis   = []
+        numbers = []
+       
+        for call_index,call in enumerate(self.calls):
+
+            number_transcript = [] #every time we make a transcript list
+            if "AI bot got this data =" in call and "Incoming:" in call and "Disposition =" in call:
+                splited_lines = call.splitlines()
+                
+                for line_index,line in enumerate(splited_lines):
+                    if "Incoming:" in line:
+                        number = line.split(" ")[1]
+                        numbers.append(number)
+                    if "AI bot got this data =" in line:
+                        text = line.split("=")[1]
+                        number_transcript.append(text)
+                    if  "Disposition =" in line:
+                        disposition = line.split("=")[1]
+                        disposition = disposition[:-19] # remove the line containing slowing with 2sec etc (By. ALI)
+                        number_dis.append(disposition)
+                
+                number_trans.append(number_transcript[0]) # getting only first Index of Transcript list
+        st.write(self.mergerd_dict)
+        # Display in One Dataframe
+        try:
+            df_number_data = {"file_id":self.filings,"Caller_ID":{self.filings:numbers}, "Transcript":{self.filings:number_trans}, "Disposition":{self.filings:number_dis}, "AI None Separater":{self.filings:self.mergerd_dict}, "total_calls":self.total_calls, "valid_calls":self.valid_calls, "total_states": self.count_class, "call_drop": self.call_drop }
+            self.number_data = df_number_data       
+        except:
+            pass 
+
+
     def driver(self,files_name):
         class_name = ""
         self.zip_extractor(file_names)        
@@ -325,8 +329,8 @@ class LogAnalytics:
         self.countValidCalls()
         self.countClass(class_name)
         self.countMostUsedPharses()
+        self.none_separator_1()
         self.none_separator_2()
-        self.none_separator()
         self.numberData()
         self.total_calls = 0
         self.valid_calls = 0
@@ -343,6 +347,13 @@ class LogAnalytics:
         self.state_seq = []
         self.trans_list = []
         self.transcripts = []
+        self.df = ""
+        self.data =""
+        self.mergerd_dict = {}
+        self.filings = str
+        self.filers_name = []
+        self.splitted_calls_3 = []
+
         return self.number_data
     
 logsinterfaces = LogAnalytics()
