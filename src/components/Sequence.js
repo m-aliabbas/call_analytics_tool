@@ -1,12 +1,26 @@
-import React from 'react'
+import React,{useEffect, useState} from 'react'
 
 export default function Sequence() {
   
-  const data = [
-    { id: 1, name: 'John Doe', age: 30 },
-    { id: 2, name: 'Jane Smith', age: 25 },
-    { id: 3, name: 'Bob Johnson', age: 35 },
-  ];
+  const [fullData , setFullData] = useState(null);
+  
+  useEffect(() => {
+    // Fetch data from API
+    fetch('http://192.168.100.115:8000/get_sequences')
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Network response was not ok');
+      })
+      .then((data) => {
+        // console.log(data);
+        setFullData(data);
+      })
+      .catch((error) => {
+        console.error('There has been a problem with your fetch operation: ', error);
+      });
+  }, []);
   return (
    <>
    
@@ -21,17 +35,47 @@ export default function Sequence() {
           {/* <th>Actions</th> */}
         </tr>
       </thead>
-      <tbody>
-        {data.map((item) => (
-          <tr key={item.id}>
-            <td>{item.id}</td>
-            <td>{item.name}</td>
-            {/* <td>
-              <button className="btn btn-danger">Detail</button>
-            </td> */}
+      {fullData ? (
+       <tbody>
+       {
+          fullData.data.map((item,key) => {
+          let a=item.sequence_dict[item.file_id].split(',');
+
+          return(
+            <>
+             <tr key={key}>
+             <td>{item.file_id}</td>
+            <td>{
+            a.map((i) => {
+              return (
+                <>
+                <span className="badge badge-primary mr-2">{i} </span>
+                </>
+              )
+            })
+            
+            }
+            
+            
+            </td>
+            
           </tr>
-        ))}
-      </tbody>
+            </>
+          )
+          })
+      
+       }
+     </tbody>
+     
+      ) : (
+        <tbody>
+        <tr>
+          <td>
+            Loading
+          </td>
+        </tr>
+        </tbody>
+      )}
     </table>
     </div>
 

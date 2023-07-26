@@ -1,34 +1,40 @@
-import React,{useState} from 'react'
+import React,{useEffect, useState} from 'react'
 import "./callanalytics.css";
 
 import axios from 'axios';
 
 export default function Callanalytics() {
-  const [selectedFiles, setSelectedFiles] = useState([]);
+  const https="http://192.168.0.157:8000"
 
+  // const [selectedFiles, setSelectedFiles] = useState([]);
+  const [fullData , setFullData] = useState(null);
+  
+  let userUrl="."
   const handleFileChange = (event) => {
     const files = event.target.files; 
-    setSelectedFiles({files});
-    console.log("send")
+    let formData = new FormData();
+    for(let i = 0; i < files.length; i++) {
+      formData.append("files", files[i], files[i].name);
+    }
+    sendFiles(formData);
+    console.log(files)
   };
-
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log(selectedFiles);
-    sendFiles(selectedFiles);
+    let files = event.target.files; 
+    let formData = new FormData();
+    for(let i = 0; i < files.length; i++) {
+      // Appending each file
+      console.log(i)
+      formData.append("files", files[i], files[i].name);
+    }
+    // console.log(selectedFiles);
+    sendFiles(formData);
   };
-
-  const data = [
-    { id: 1, name: 'John Doe', age: 30 },
-    { id: 2, name: 'Jane Smith', age: 25 },
-    { id: 3, name: 'Bob Johnson', age: 35 },
-  ];
-  const sendFiles = async  (files)  => {
-    const formData = new FormData();
-    formData.append("files", selectedFiles.files[0], 'files')
+  const sendFiles = async  (formData)  => {
     
     const response = 	axios({
-      url: "http://192.168.100.115:8000/uploadfiles/",
+      url: https+"/uploadfiles/",
       method: "POST",
         headers: {
             'Content-Type': 'multipart/form-data',
@@ -41,15 +47,33 @@ export default function Callanalytics() {
       .catch((err) => { });
     console.log(response.data);
 }
+useEffect(() => {
+  // Fetch data from API
+  fetch(https+'/get_full_data')
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw new Error('Network response was not ok');
+    })
+    .then((data) => {
+      // console.log(data);
+      setFullData(data);
+    })
+    .catch((error) => {
+      console.error('There has been a problem with your fetch operation: ', error);
+    });
+}, []);
   return (
    <>
   
 {/* form */}
 
-<h1>Call Analytics</h1>
 
+<h1 className='heading'>Call Analytics</h1>
      <div className="form-container">
-      <h2>File Upload Form</h2>
+      
+      <h2 className='file-heading'>File Upload Form</h2>
       <form method='POST' encType='multipart/form-data' onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="audioFiles">Select Audio File(s):</label>
@@ -57,12 +81,12 @@ export default function Callanalytics() {
             type="file"
             id="files"
             name="files"
-            // accept=".wav"
+            accept=".wav"
             multiple
             onChange={handleFileChange}
           />
         </div>
-        <button type="submit">Upload</button>
+        {/* <button className='file-btn' type="submit">Upload</button> */}
       </form>
     </div>
 
@@ -78,18 +102,44 @@ export default function Callanalytics() {
           <th>Actions</th>
         </tr>
       </thead>
-      <tbody>
-        {data.map((item) => (
-          <tr key={item.id}>
-            <td>{item.id}</td>
-            <td>{item.name}</td>
+      {fullData ? (
+       <tbody>
+       {
+          fullData.data.map((item,key) => {
+            // console.log(item.full_transcript);
+            let userId="/getdetails/"+item.file_id
+         
+          return(
+            <>
+             <tr key={key}>
+            <td>{item.file_id}</td>
+            <td>{item.full_transcript[item.file_id]}</td>
             <td>
-              <button className="btn btn-danger">Detail</button>
+              
+              <button>
+                <a href={userUrl + userId}> Details</a>
+                
+              </button>
             </td>
           </tr>
-        ))}
-      </tbody>
-    </table>
+            </>
+          )
+          })
+      
+       }
+     </tbody>
+     
+      ) : (
+        <tbody>
+        <tr>
+          <td>
+            Loading
+          </td>
+        </tr>
+        </tbody>
+      )}
+ 
+ </table>
     </div>
    </>
   )

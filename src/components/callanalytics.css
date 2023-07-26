@@ -1,13 +1,21 @@
 .form-container {
-    width: 400px;
+    width: 80%;
     margin: 0 auto;
     padding: 20px;
     background-color: #f1f1f1;
   }
+  .heading{
+    font-weight: 700;
+    text-align: center;
+    padding-bottom: 2%;
+    padding-top: 2%;
+    font-style: italic;
+  }
   
   .form-container h2 {
-    text-align: center;
+    font-variant: small-caps;
     margin-bottom: 20px;
+    letter-spacing: -1px;
   }
   
   .form-group {
@@ -20,24 +28,30 @@
   }
   
   input[type='file'] {
-    display: block;
+  font-style: oblique;
+    text-align: center;
   }
   
-  button {
+  .file-btn {
     display: block;
     padding: 10px 20px;
-    background-color: #4caf50;
+    background-color: #2c62f5;
     color: #fff;
     border: none;
     cursor: pointer;
+    font-weight: 600;
   }
   
-  button:hover {
-    background-color: #45a049;
+  .file-btn:hover {
+    background-color: #1b4fdf;
+  }
+  .file-btn:focus-visible {
+    background-color: #1b4fdf;
+    border: solid 1px rgb(199, 83, 83);
   }
   
 
 .table-out{
-   margin: 5% 10% 0% 10%;
+   margin: 2% 10% 0% 10%;
 
 }

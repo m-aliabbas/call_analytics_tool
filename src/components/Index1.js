@@ -1,4 +1,5 @@
 import React from 'react'
+import "./index1.css"
 import Sidebar from './Sidebar'
 import { BrowserRouter, Routes, Route, } from 'react-router-dom';
 import Home from './Home';
@@ -7,16 +8,19 @@ import Mub from './Mub';
 import Sequence from './Sequence';
 import Loganalytics from './Loganalytics';
 import Callanalytics from './Callanalytics';
+import Getdetails from './Getdetails';
+import Test from './Test';
+import Mypage from './Mypage';
 export default function Index1() {
     return (
         <>
-            <div className='row'>
+            <div className='row main'>
 
-                <div className='col-md-2 st '>
+                <div className='col-2'>
                 <Sidebar />
 
                 </div>
-                <div className='col-md-10 nd'>
+                <div className='col-10'>
 
                     <BrowserRouter>
                         <Routes>
@@ -26,6 +30,9 @@ export default function Index1() {
                             <Route path="/mub" element={<Mub/>} />
                             <Route path="/sequence" element={<Sequence/>} />
                             <Route path="/loganalytics" element={<Loganalytics/>} />
+                            <Route path="/getdetails/:id" element={<Getdetails/>} />
+                            {/* <Route path="/mypage" element={<Mypage/>} /> */}
+                             <Route path="/test" element={<Test/>} />
                         </Routes>
                     </BrowserRouter>
                 </div>
