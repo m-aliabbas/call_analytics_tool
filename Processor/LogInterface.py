@@ -13,6 +13,7 @@ class LogInterface:
                  collection_name='log_record',)
 
     def insert_to_db(self,file_name):
+        print("files_name: ",file_name)
         data = self.log_processor.driver(files_name=file_name)
         file_id = data["file_id"]
         # print(data)
@@ -50,7 +51,7 @@ class LogInterface:
     def get_none_bot_hanged_up(self):
         pass
 
-files_name = ["7C-D3-0A-1A-C3-C4_1676679530.txt"]
+files_name = ["7C-D3-0A-1A-C3-56_1676588618.txt"]
 logsinterface = LogInterface()
-# logsinterface.insert_to_db(files_name)
-logsinterface.get_none_responsis_pharase_freq()
+logsinterface.insert_to_db(files_name)
+# logsinterface.get_none_responsis_pharase_freq()
