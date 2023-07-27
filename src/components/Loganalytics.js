@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { PieChart, Pie, Tooltip, Legend, Cell, ResponsiveContainer } from 'recharts';
+import Plotly from 'plotly.js-dist';
 import axios from 'axios';
 import "./loganalytics.css"
 
@@ -111,20 +111,42 @@ export default function Loganalytics() {
   // console.log(fullData)
   console.log(fullData);
 
-  // pie chart
-  const data = [
-    { name: 'Category 1', value: 100 },
-    { name: 'Category 2', value: 100 },
-    { name: 'Category 3', value: 100 },
-    { name: 'Category 4', value: 100 },
-    { name: 'Category 5', value: 100 },
-  ];
 
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+  // bar chart
+  const [dataPoints, setDataPoints] = useState([
+    { country: "Italy", value: 55 },
+    { country: "France", value: 49 },
+    { country: "Spain", value: 44 },
+    { country: "USA", value: 24 },
+    { country: "Argentina", value: 15 },
+    { country: "Pakistan", value: 80 },
+    { country: "Islamic State Pakistan", value: 10 },
+  ]);
+
+  useEffect(() => {
+    const xArray = dataPoints.map(point => point.country);
+    const yArray = dataPoints.map(point => point.value);
+
+    const data = [{
+      x: xArray,
+      y: yArray,
+      type: "bar",
+      orientation: "v",
+      marker: { color:  "rgba(0, 0, 255, 0.6)"} // Use the color for bar
+    }];
+
+    const layout = { title: "" };
+
+    Plotly.newPlot("myPlot", data, layout);
+
+    return () => Plotly.purge("myPlot");
+  }, [dataPoints]);
+
+
   return (
     <>
 
-      <div className="form-container">
+      <div className="form-container mt-3">
 
         <h2 className='file-heading'>File Upload Form</h2>
         <form method='POST' encType='multipart/form-data' onSubmit={handleSubmit}>
@@ -156,30 +178,10 @@ export default function Loganalytics() {
         </form>
       </div>
 
-      {/* pie chart */}
+      {/* bar chart */}
 
-      <div style={{ width: '100%', height: 300 }}>
-        <ResponsiveContainer>
-          <PieChart>
-            <Pie
-              data={data}
-              cx="30%" // Adjust this to align the Pie component
-              cy="50%"
-              labelLine={false}
-              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-              outerRadius={80}
-              fill="#8884d8"
-              dataKey="value"
-            >
-              {
-                data.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)
-              }
-            </Pie>
-            <Tooltip />
-            <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ lineHeight: '40px', marginRight: '20%' }} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
+      {/* <div style={{ width: '100%', height: 300 }}>  </div> */}
+        <div className='bar-graph' id="myPlot" style={{ width: "100%", maxWidth: "1200px" }}></div>
 
 
       {/* class Name */}

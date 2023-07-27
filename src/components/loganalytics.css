@@ -8,15 +8,6 @@ justify-content: center;
 .in-log{
     width: 80%;
 }
-.table-log{
-    /* width: 80%; */
-}
-/* 
-.table-out-log{
-    display: flex;
-    justify-content: center;
-} */
-
 .progress-bar-container {
     width: 100%;
     display: flex;
@@ -26,4 +17,10 @@ justify-content: center;
   .upload-progress {
     width: 100%;
     height: 20px;
+  }
+
+  .bar-graph{
+    /* text-align: center;
+     */
+     margin-left: 6%;
   }
