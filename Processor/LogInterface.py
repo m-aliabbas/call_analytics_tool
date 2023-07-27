@@ -3,11 +3,12 @@ from DataSource.Mongo_DB import Mongo_DB
 import requests
 import json
 import os
+import pandas as pd
 
 class LogInterface:
     def __init__(self,):
         self.log_processor = LogAnalytics()
-        self.DB = Mongo_DB(address='mongodb://0.0.0.0:27017/',
+        self.DB = Mongo_DB(address='mongodb://localhost:27017/',
                  db_name='call_analytics_tool',
                  collection_name='log_record',)
 
@@ -39,9 +40,9 @@ class LogInterface:
     # in sary functions me mongo db se data lena he ; us data k none ai responsis wali key me jana he; us ki frequency k lie aik df bnaien us se asain hojae gi; df[TEct col].value_counts ; or dobra dictionary bna k return krni he anwar ko 
     def get_none_responsis_pharase_freq(self):
         data = self.DB.find({},['AI None Separater','file_id'])
-        # print(data)
-        for i in data:
-            print(i)
+        df = pd.DataFrame(data)
+        print(df)
+        
         
     def get_none_responis_word_freq(self):
         pass
