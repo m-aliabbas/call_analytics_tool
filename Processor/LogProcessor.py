@@ -54,12 +54,11 @@ class LogAnalytics:
         self.mergerd_dict = {}
 
     def zip_extractor(self,file_names):     
-        path = ""    
         # opening the zip file in READ mode
         for filing in file_names:
-            with open(os.path.join(path,filing), 'r') as zip:
+            with open(os.path.join(self.path,filing), 'r') as zip:
                 # printing all the contents of the zip file
-                # zip.printdir()
+                zip.printdir()
             
                 # extracting all the files
                 # print('Extracting all the files now...')

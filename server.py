@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import requests
 import time
 import os
+import zipfile
 
 app = FastAPI()
 
@@ -162,6 +163,17 @@ def get_bot_hanged():
     return json_data
 
 
+
+def zip_extractor(file_names):     
+    # opening the zip file in READ mode
+    file_address = []
+    with zipfile.ZipFile(file_names, "r") as zip_ref:
+        for file_info in zip_ref.infolist():
+            extracted_path = zip_ref.extract(file_info.filename)
+            file_address.append(extracted_path)
+    return file_address
+
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
@@ -185,6 +197,13 @@ async def create_log_upload_files(files: List[UploadFile] = File(...)):
     for file in files:
         # Save the uploaded file
         file_path = save_uploaded_log_file(file)
+        # call zip function here
+        # it should return all file in zip and extract 
+        # put the list return to interface insert db
+        # or pass one y one
+
+        # new_file_list = zip_extractor(file_path)
+        # print("----------printing list of files: ", new_file_list)
         print(file_path)
         status,msg = LogInterface.insert_to_db([file_path])
         print(msg)

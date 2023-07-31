@@ -23,7 +23,7 @@ class LogInterface:
         self.log_processor = LogAnalytics()
         self.DB = Mongo_DB(address='mongodb://localhost:27017/',
                  db_name='call_analytics_tool',
-                 collection_name='log_record1',)
+                 collection_name='log_record2',)
 
     
     def insert_to_db(self,file_name):
@@ -83,7 +83,9 @@ class LogInterface:
             frequency_dict = {}
             for item in list_of_words:
                 frequency_dict[item] = frequency_dict.get(item, 0) + 1
-            data_response = {"status":True,"data":frequency_dict,"msg":"data got"}
+
+            sorted_frequency_dict = {k: v for k, v in sorted(frequency_dict.items(), key=lambda item: item[1], reverse=True)}
+            data_response = {"status":True,"data":sorted_frequency_dict,"msg":"data got"}
         else:
             data_response = {"status":False,"data":{},"msg":f"You got the error "}
             print(data_response)
