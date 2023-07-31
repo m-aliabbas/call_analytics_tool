@@ -10,7 +10,7 @@ import Loganalytics from './Loganalytics';
 import Callanalytics from './Callanalytics';
 import Getdetails from './Getdetails';
 import Test from './Test';
-import Mypage from './Mypage';
+import Loganalytics2 from './Loganalytics2';
 export default function Index1() {
     return (
         <>
@@ -31,7 +31,7 @@ export default function Index1() {
                             <Route path="/sequence" element={<Sequence/>} />
                             <Route path="/loganalytics" element={<Loganalytics/>} />
                             <Route path="/getdetails/:id" element={<Getdetails/>} />
-                            {/* <Route path="/mypage" element={<Mypage/>} /> */}
+                            <Route path="/loganalytics2" element={<Loganalytics2/>} />
                              <Route path="/test" element={<Test/>} />
                         </Routes>
                     </BrowserRouter>

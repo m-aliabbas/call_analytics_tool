@@ -34,6 +34,7 @@ export default function Sidebar() {
           </div>
         
         <li className='main-head'><a href="/loganalytics">Log Analytics</a></li>
+        <li className='main-head'><a href="/loganalytics2">Log Analytics 2</a></li>
         <li className='main-head'><a href="/test">Test</a></li>
       </ul>
     </div>
