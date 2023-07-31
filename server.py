@@ -1,9 +1,10 @@
 from typing import Union
-from fastapi import FastAPI
+from fastapi import FastAPI,Response
+from fastapi.responses import StreamingResponse
 from Processor.Interface import Interface
 from Processor.LogInterface import LogInterface
 import json
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File,WebSocket
 from typing import List
 import ast
 from bson import json_util
@@ -139,4 +140,70 @@ def get_full_data():
     json_data = parse_json(data)
     return json_data
 
+@app.get("/get_phrase_freq")
+def get_phrase_freq():
+    data = LogInterface.get_none_responsis_pharase_freq()
+    data = {'data': data}
+    json_data = parse_json(data)
+    return json_data
 
+@app.get("/get_word_freq")
+def get_word_freq():
+    data=LogInterface.get_none_responis_word_freq()
+    data = {'data': data}
+    json_data = parse_json(data)
+    return json_data
+
+@app.get("/get_bot_hanged")
+def get_bot_hanged():
+    data=LogInterface.get_none_bot_hanged_up()
+    data = {'data': data}
+    json_data = parse_json(data)
+    return json_data
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+
+    while True:
+        action = await websocket.receive_text()
+        if action == "get_progress":
+            # You can replace this with a call to retrieve actual progress
+            progress = get_current_progress()
+            await websocket.send_json({"progress": progress})
+        elif action == "stop":
+            break
+
+    await websocket.close()
+
+
+@app.post("/uploadlogfiles/")
+async def create_log_upload_files(files: List[UploadFile] = File(...)):
+    global progress
+    progress = 0
+    for file in files:
+        # Save the uploaded file
+        file_path = save_uploaded_log_file(file)
+        print(file_path)
+        status,msg = LogInterface.insert_to_db([file_path])
+        print(msg)
+        progress += 100 / len(files)
+    return {'status': 'done'}
+
+def save_uploaded_log_file(file: UploadFile) -> str:
+    filename = file.filename
+    print(file.filename, 1234)
+    upload_dir = "./uploaded_files"
+    os.makedirs(upload_dir, exist_ok=True)
+    file_path = os.path.join(upload_dir, filename)
+    with open(file_path, "wb") as f:
+        f.write(file.file.read())
+    file_path  = os.path.abspath(file_path)
+    return file_path
+
+def get_current_progress():
+    global progress
+    return progress
+
+progress = 0

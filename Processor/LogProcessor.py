@@ -38,7 +38,7 @@ class LogAnalytics:
         self.filings = str
         self.filers_name = []
         self.splitted_calls_3 = []
-        self.path = ""
+        self.path = "/home/idrak/Desktop/idrak_work/call_analytics_tool/uploaded_files/"
         self.state_dict = {
             "playing hello": "hello",
             "playing intro": "intro",
@@ -57,7 +57,7 @@ class LogAnalytics:
         path = ""    
         # opening the zip file in READ mode
         for filing in file_names:
-            with ZipFile(os.path.join(path,filing), 'r') as zip:
+            with open(os.path.join(path,filing), 'r') as zip:
                 # printing all the contents of the zip file
                 # zip.printdir()
             
@@ -180,6 +180,7 @@ class LogAnalytics:
         # "DNC", "Not Interested", "Ans Machine", "Transfer",
         states_to_find = ["DNC", "Not Interested", "Ans Machine","Hang Up","Not Qualified","Negative","Positive", "Transfer","Bot Hanged UP","No Answer","Caller Hanged Up"]
         phone_num = '123'
+        print(len(data_lines))
         for i in range(len(data_lines)):
             line = data_lines[i]
 
@@ -230,7 +231,7 @@ class LogAnalytics:
             # df.to_csv(f'{file_name[:-4]}_processed.csv', index=False)
         else:
             self.df_temp = pd.DataFrame()
-            print(f"No results found in {file_name}")
+            print(f"No results found in")
 
 
     def none_separator_2(self,):
