@@ -5,6 +5,7 @@ import json
 import os
 import re
 import pandas as pd
+from collections import Counter
 
 def cleanify(text):
     # Convert the text to lowercase
@@ -23,7 +24,7 @@ class LogInterface:
         self.log_processor = LogAnalytics()
         self.DB = Mongo_DB(address='mongodb://localhost:27017/',
                  db_name='call_analytics_tool',
-                 collection_name='log_record2',)
+                 collection_name='log_record16',)
 
     
     def insert_to_db(self,file_name):
@@ -51,11 +52,12 @@ class LogInterface:
         data = self.DB.find({'file_id':file_id})
         return data
     
-    def get_none_responsis_pharase_freq(self):
+    def get_none_responsis_pharase_freq(self,state = 'all'):
         data = self.DB.find({},['AI None Separater','file_id'])
         try:
             key = list(data[0]['AI None Separater'].keys())[0]
             df_temp = pd.DataFrame(data[0]['AI None Separater'][key])
+
             df_list = []
             if len(data)>1:
                 for i in range(1,len(data)):
@@ -64,14 +66,21 @@ class LogInterface:
                     df_list.append(df_temp1)
             df_concat = pd.concat(df_list)
             df_temp = pd.concat([df_temp,df_concat])
-        
-            counter =    df_temp['AI bot got this data'].apply(cleanify).value_counts()
-            data_response = {"status":True,"data":counter.to_dict(),"msg":"data got"}
+            if state != 'all':
+                counting = []
+                for index, row in df_temp.iterrows():         
+                    if row['Current State'] == state: 
+                        counting.append(row['AI bot got this data'])
+                        # current state jab state k equal ho to wo row nikalo
+                counters = Counter(counting)
+            else:    
+                counting =    df_temp['AI bot got this data'].apply(cleanify).value_counts()
+                counters = counting.to_dict()
+            data_response = {"status":True,"data":counters,"msg":"data got"}
             
         except Exception as e:
             print(e)
             data_response = {"status":False,"data":{},"msg":f"You got the error {e}"}
-        print("datas: ",data_response)
         return data_response
         
     def get_none_responis_word_freq(self):
@@ -88,7 +97,6 @@ class LogInterface:
             data_response = {"status":True,"data":sorted_frequency_dict,"msg":"data got"}
         else:
             data_response = {"status":False,"data":{},"msg":f"You got the error "}
-            print(data_response)
         return data_response
 
     def get_none_bot_hanged_up(self):
@@ -115,6 +123,7 @@ class LogInterface:
         # print(data_response)
         return data_response
 
-# files_name = ["7C-D3-0A-1A-C3-78_1676679544.txt"]
+# files_name = ["7C-D3-0A-1A-C3-C4_1676679530.txt"]
 # logsinterface = LogInterface()
-# logsinterface.get_none_responis_word_freq()
+# logsinterface.insert_to_db(files_name)
+# logsinterface.get_none_responsis_pharase_freq()

@@ -24,4 +24,8 @@ class Mongo_DB:
             return list(self.collection.find(file_id,cols))
         else:
             return list(self.collection.find({},cols))
+        
     
+    def empty(self):
+        x = self.collection.drop()
+        return x

@@ -171,7 +171,6 @@ class LogAnalytics:
         # get most common n-grams
         self.most_common_ngrams = ngrams.most_common(5)
 
-
     def none_separator_1(self,):
         data_lines = self.data.split('\n')
         results = []
@@ -188,7 +187,11 @@ class LogAnalytics:
             if phone_num_match:
                 phone_num = phone_num_match.group(0).split(':')[1].strip()
                 result['Phone Number'] = phone_num_match.group(0).split(':')[1].strip()
-
+            if 'playing' in line:
+                line = line.replace("-","")
+                line = line.replace("playing","")
+                line = line.strip()
+                result['Current State'] = line
             # Detect AI bot data
             ai_bot_match = re.search(r"AI bot got this data = (.*)", line)
             if ai_bot_match:
@@ -225,6 +228,7 @@ class LogAnalytics:
         if len(results) > 0:
 
             self.df_temp = pd.DataFrame(results)
+            print(self.df_temp)
             # st.dataframe(df)
             # df = df.dropna()
             # df.to_csv(f'{file_name[:-4]}_processed.csv', index=False)

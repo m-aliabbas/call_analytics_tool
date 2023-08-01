@@ -202,12 +202,12 @@ async def create_log_upload_files(files: List[UploadFile] = File(...)):
         # put the list return to interface insert db
         # or pass one y one
 
-        # new_file_list = zip_extractor(file_path)
-        # print("----------printing list of files: ", new_file_list)
-        print(file_path)
-        status,msg = LogInterface.insert_to_db([file_path])
-        print(msg)
-        progress += 100 / len(files)
+        new_file_list = zip_extractor(file_path)
+        new_file_list.pop(0)
+        for path in new_file_list:
+            status,msg = LogInterface.insert_to_db([path])
+            print(msg)
+            progress += 100 / len(files)
     return {'status': 'done'}
 
 def save_uploaded_log_file(file: UploadFile) -> str:
