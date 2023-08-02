@@ -43,6 +43,15 @@ class LogInterface:
                 print('Error')
                 return False,'Something went wrong'
     
+    def empty_db(self,):
+        temp = self.DB.empty()
+        if temp:
+            print('Eliminated')
+            return True, 'Data Eliminated successfully'
+        else:
+            print('Error')
+            return False,'Something went wrong'
+
     def get_complete_data(self,):
         data = self.DB.find()
         # print(data)
@@ -67,18 +76,7 @@ class LogInterface:
             df_temp = pd.concat([df_temp,df_concat])
 
             new_list =  df_temp['Current State'].value_counts().keys()
-            # counting = []
-            
-            # for index, row in df_temp.iterrows():
-            #     if row['Current State'] :         
-            #         counting.append(row['Current State'])
-                
-            #     # my_list = []
-            #     # for item in counting:
-            #     #     if item is str:
-            #     #         my_list.append(item)
-            #     my_list = [item for item in counting if not isinstance(item, dict)]
-
+            new_list = new_list.insert(0, 'all')
             data_response = {"status":True,"data":new_list,"msg":"data got"}
             
         except Exception as e:
@@ -86,7 +84,7 @@ class LogInterface:
             data_response = {"status":False,"data":[],"msg":f"You got the error {e}"}
         return data_response
 
-    def get_none_responsis_pharase_freq(self,direct_flag = False, state = 'intro'):
+    def get_none_responsis_pharase_freq(self,direct_flag = False, state = 'all'):
         data = self.DB.find({},['AI None Separater','file_id'])
         try:
             key = list(data[0]['AI None Separater'].keys())[0]

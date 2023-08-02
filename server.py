@@ -149,6 +149,14 @@ def get_all_states():
     json_data = parse_json(data)
     return json_data
 
+@app.get("/get_phrase_freq/{state}")
+def get_phrase_freq(state: str):
+    # get state from url and pass tofunction below
+    data = LogInterface.get_none_responsis_pharase_freq(state = state)
+    data = {'data': data}
+    json_data = parse_json(data)
+    return json_data
+
 @app.get("/get_phrase_freq")
 def get_phrase_freq():
     # get state from url and pass tofunction below
@@ -213,6 +221,7 @@ async def create_log_upload_files(files: List[UploadFile] = File(...)):
 
         new_file_list = zip_extractor(file_path)
         new_file_list.pop(0)
+        LogInterface.empty_db()
         for path in new_file_list:
             status,msg = LogInterface.insert_to_db([path])
             print(msg)
