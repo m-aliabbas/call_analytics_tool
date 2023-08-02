@@ -4,7 +4,7 @@ import "./callanalytics.css";
 import axios from 'axios';
 
 export default function Callanalytics() {
-  const https="http://192.168.100.100:8000"
+  const https="http://192.168.100.100:8081"
 
   // const [selectedFiles, setSelectedFiles] = useState([]);
   const [fullData , setFullData] = useState(null);

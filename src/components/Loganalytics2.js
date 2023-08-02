@@ -4,6 +4,8 @@ import axios from 'axios';
 export default function Loganalytics2() {
   const https = "http://110.93.240.107:8081"
 
+
+const [state, setState] = useState(null);
   const [pharsesData, setpharsesData] = useState(null);
   const [wordData, setWordData] = useState(null);
   const [botData, setBotData] = useState(null);
@@ -14,7 +16,7 @@ export default function Loganalytics2() {
   
   useEffect(() => {
     // Fetch data from API
-    fetch(https + '/get_phrase_freq')
+    fetch(https + '/get_phrase_freq/all')
       .then((response) => {
         if (response.ok) {
           return response.json();
@@ -64,6 +66,42 @@ export default function Loganalytics2() {
       });
   }, []);
 
+
+  useEffect(() => {
+    // Fetch data from API
+    fetch(https + '/get_states')
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Network response was not ok');
+      })
+      .then((data) => {
+        setState(data.data);
+      })
+      .catch((error) => {
+        console.error('There has been a problem with your fetch operation: ', error);
+      });
+  }, []);
+  // console.log(state)
+
+  const handleOnChangeSelect =(e)=>{
+    // console.log(e)
+    const option = e.target.value;
+    fetch(https + '/get_phrase_freq/'+ option)
+    .then((response) => {
+        if (response.ok) {
+            return response.json();
+        }
+        throw new Error('Network response was not ok');
+    })
+    .then((data) => {
+        setpharsesData(data.data);
+    })
+    .catch((error) => {
+        console.error('There has been a problem with your fetch operation: ', error);
+    });
+}
   
 
   // file upload
@@ -106,7 +144,7 @@ export default function Loganalytics2() {
       .catch((err) => { });
     // console.log(response);
   }
-  const itemsPerPage = 20;
+  const itemsPerPage = 5;
 
   // State variables for pagination
   const [currentPagePhrases, setCurrentPagePhrases] = useState(1);
@@ -159,11 +197,36 @@ export default function Loganalytics2() {
 </div>
 
 
+          {state && (
+                          
+<span className='dropdown-ft'
+          style={{
+            padding: "10px",
+            fontSize: "14px",
+            borderRadius: "5px",
+            border: "none",
+            boxShadow: "0 2px 5px rgba(0, 0, 0, 0.15)",
+            width: "9%"
+          }}
+          >
+          <select onChange={handleOnChangeSelect}> {/* Use the event value directly */}
+              {Object.entries(state.data)
+                .map((item, key) => {
+              return (
+              <>
+          <option>{item[1]}</option>
+              </>)
+           })}
+            </select>
+          </span>
+         )}
+
+
     <div className='main-log'>
       <div className='in-log'>
 
-      
-
+      {pharsesData ? 
+       <div>
       {/* table 1 */}
     <h2 className='heading'>
       Phrases
@@ -171,13 +234,13 @@ export default function Loganalytics2() {
       <table className="table">
         <thead className="thead-light">
           <tr>
-            <th>
+            <th className='td-border col-1'>
               Sr
             </th>
-            <th>
+            <th className='td-border-c col-7'>
               Phrase
             </th>
-            <th>
+            <th className='td-border col-2'>
               Frequency
             </th>
           </tr>
@@ -192,13 +255,13 @@ export default function Loganalytics2() {
               return (
               <>
               <tr>
-                <td>
+                <td className='td-border col-1'>
                   {(currentPagePhrases - 1) * itemsPerPage+key+1 }
                 </td>
-                <td>
+                <td className='td-border-c col-7'>
                   {item[0]}
                 </td>
-                <td>
+                <td className='td-border col-2'>
                 {item[1]}
                 </td>
             </tr>
@@ -214,12 +277,14 @@ export default function Loganalytics2() {
             Next
           </button> : console.log('no')
            }
-           {/*  */}
-        
-
       </table>
+     </div>
+       : <p>Loading ...</p>}
 
 
+
+{wordData ? 
+       <div>
 
        {/* table 2 */}
     <h2  className='heading'>
@@ -228,13 +293,13 @@ export default function Loganalytics2() {
       <table className="table">
         <thead className="thead-light">
           <tr>
-            <th>
+            <th className='td-border col-1'>
               Sr
             </th>
-            <th>
+            <th className='td-border-c col-7'>
               Word
             </th>
-            <th>
+            <th className='td-border col-2'>
               Frequency
             </th>
           </tr>
@@ -248,13 +313,13 @@ export default function Loganalytics2() {
               return (
               <>
               <tr>
-                <td>
+                <td className='td-border col-1'>
                 {(currentPageWords - 1) * itemsPerPage+key+1}
                 </td>
-                <td>
+                <td className='td-border-c col-7'>
                   {item[0]}
                 </td>
-                <td>
+                <td className='td-border col-2'>
                 {item[1]}
                 </td>
             </tr>
@@ -272,9 +337,13 @@ export default function Loganalytics2() {
          </button> : console.log('no')
            }
       </table>
+      </div>
+       : <p>Loading ...</p>}
 
 
 
+{botData ? 
+       <div>
 
 {/* table 3 */}
 <h2  className='heading'>
@@ -283,10 +352,10 @@ export default function Loganalytics2() {
       <table className="table">
         <thead className="thead-light">
           <tr>
-            <th>
+            <th className='td-border col-1'>
               Sr
             </th>
-            <th>
+            <th className='td-border-c col-10'>
               Phrase
             </th>
           </tr>
@@ -300,10 +369,10 @@ export default function Loganalytics2() {
               return (
               <>
               <tr>
-                <td>
+                <td className='td-border col-1'>
                 {(currentPageBotData - 1) * itemsPerPage+key+1}
                 </td>
-                <td>
+                <td className='td-border-c col-10'>
                   {item[1]}
                 </td>
             </tr>
@@ -320,9 +389,10 @@ export default function Loganalytics2() {
             Next
           </button>: console.log('no')
            }
-        
-
       </table>
+      </div>
+       : <p>Loading ...</p>}
+
 
 
 
