@@ -141,8 +141,17 @@ def get_full_data():
     json_data = parse_json(data)
     return json_data
 
+@app.get("/get_states")
+def get_all_states():
+    # write a method for it in log interface
+    data = LogInterface.get_states()
+    data = {'data': data}
+    json_data = parse_json(data)
+    return json_data
+
 @app.get("/get_phrase_freq")
 def get_phrase_freq():
+    # get state from url and pass tofunction below
     data = LogInterface.get_none_responsis_pharase_freq()
     data = {'data': data}
     json_data = parse_json(data)

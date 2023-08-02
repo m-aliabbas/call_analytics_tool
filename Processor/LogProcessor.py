@@ -187,7 +187,7 @@ class LogAnalytics:
             if phone_num_match:
                 phone_num = phone_num_match.group(0).split(':')[1].strip()
                 result['Phone Number'] = phone_num_match.group(0).split(':')[1].strip()
-            if 'playing' in line:
+            if '------------ playing' in line:
                 line = line.replace("-","")
                 line = line.replace("playing","")
                 line = line.strip()
