@@ -3,7 +3,47 @@ import React, { useState, useEffect } from 'react'
 export default function Test() {
     const [state, setState] = useState(null);
     const https = "http://110.93.240.107:8081"
+    const [wordData, setWordData] = useState(null);
     const [pharsesData, setpharsesData] = useState(null);
+
+
+    useEffect(() => {
+        // Fetch data from API
+        fetch(https + '/get_word_freq')
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
+            }
+            throw new Error('Network response was not ok');
+          })
+          .then((data) => {
+            setWordData(data.data);
+          })
+          .catch((error) => {
+            console.error('There has been a problem with your fetch operation: ', error);
+          });
+      }, []);
+      // console.log(wordData)
+      const handleChangeSelect =(e)=>{
+        // console.log(e.target.value)
+        const option = e.target.value;
+        fetch(https + '/get_phrase_freq/'+ option)
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            }
+            throw new Error('Network response was not ok');
+        })
+        .then((data) => {
+            setpharsesData(data.data);
+        })
+        .catch((error) => {
+            console.error('There has been a problem with your fetch operation: ', error);
+        });
+    }
+
+
+
 
 
     useEffect(() => {
@@ -52,7 +92,7 @@ export default function Test() {
         setCurrentPagePhrases(currentPagePhrases + 1);
     };
     const handleOnChangeSelect =(e)=>{
-        console.log(e.target.value)
+        // console.log(e.target.value)
         const option = e.target.value;
         fetch(https + '/get_phrase_freq/'+ option)
         .then((response) => {
@@ -168,6 +208,90 @@ export default function Test() {
                     </table>
                 </div>
                 : <p>Loading ...</p>}
+
+
+
+{state && (
+
+<span className='dropdown-ft'
+    style={{
+        padding: "10px",
+        fontSize: "14px",
+        borderRadius: "5px",
+        border: "none",
+        boxShadow: "0 2px 5px rgba(0, 0, 0, 0.15)",
+        width: "9%"
+    }}
+>
+    <select onChange={handleChangeSelect}> {/* Use the event value directly */}
+        {Object.entries(state.data)
+            .map((item, key) => {
+                return (
+                    <>
+                        <option>{item[1]}</option>
+                    </>)
+            })}
+    </select>
+</span>
+)}
+
+
+{wordData ? 
+       <div>
+
+       {/* table 2 */}
+    <h2  className='heading'>
+      Words
+    </h2>
+      <table className="table">
+        <thead className="thead-light">
+          <tr>
+            <th className='td-border col-1'>
+              Sr
+            </th>
+            <th className='td-border-c col-7'>
+              Word
+            </th>
+            <th className='td-border col-2'>
+              Frequency
+            </th>
+          </tr>
+        </thead>
+        
+        {wordData && (
+            <tbody>
+              {Object.entries(wordData.data)
+                .slice((currentPageWords - 1) * itemsPerPage, currentPageWords * itemsPerPage)
+                .map((item, key) => {
+              return (
+              <>
+              <tr>
+                <td className='td-border col-1'>
+                {(currentPageWords - 1) * itemsPerPage+key+1}
+                </td>
+                <td className='td-border-c col-7'>
+                  {item[0]}
+                </td>
+                <td className='td-border col-2'>
+                {item[1]}
+                </td>
+            </tr>
+              </>)
+           })}
+           </tbody>
+         )}
+         <button onClick={handlePreviousPageWords} disabled={currentPageWords <= 1}>
+           Previous
+         </button>
+         {
+            pharsesData ?
+         <button onClick={handleNextPageWords} disabled={currentPageWords >= Math.ceil(wordData.data.length / itemsPerPage)}>
+           Next
+         </button> : console.log('no')
+           }
+      </table>
+      </div>
+       : <p>Loading ...</p>}
         </>
     )
 }
