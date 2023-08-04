@@ -83,7 +83,8 @@ class LogInterface:
             print(e)
             data_response = {"status":False,"data":[],"msg":f"You got the error {e}"}
         return data_response
-
+    def word_counts(self,text):
+        return len(text.split(' '))
     def get_none_responsis_pharase_freq(self,direct_flag = False, state = 'all'):
         data = self.DB.find({},['AI None Separater','file_id'])
         try:
@@ -98,6 +99,10 @@ class LogInterface:
                     df_list.append(df_temp1)
             df_concat = pd.concat(df_list)
             df_temp = pd.concat([df_temp,df_concat])
+            df_temp['length'] = df_temp['AI bot got this data'].apply(self.word_counts)
+            if not direct_flag:
+                df_temp= df_temp[df_temp['length']>3]
+
             if state != 'all':
                 counting = []
                 for index, row in df_temp.iterrows():         
@@ -108,6 +113,14 @@ class LogInterface:
             else:    
                 counting =    df_temp['AI bot got this data'].apply(cleanify).value_counts()
                 counters = counting.to_dict()
+            lister = []
+            listing=[]
+            for keys,values in counters.items():
+                lister = keys.split()
+                for item in lister:
+                    if len(item) == 1:
+                        listing.append(item)
+
             data_response = {"status":True,"data":counters,"msg":"data got"}
             
         except Exception as e:
@@ -115,8 +128,8 @@ class LogInterface:
             data_response = {"status":False,"data":{},"msg":f"You got the error {e}"}
         return data_response
         
-    def get_none_responis_word_freq(self):
-        data = self.get_none_responsis_pharase_freq()
+    def get_none_responis_word_freq(self,state = 'all',direct_flag=True):
+        data = self.get_none_responsis_pharase_freq(direct_flag=direct_flag)
         if data['status']:
             data = data['data']
             data = list(data.keys())
@@ -136,6 +149,7 @@ class LogInterface:
         try:
             key = list(data[0]['AI None Separater'].keys())[0]
             df_temp = pd.DataFrame(data[0]['AI None Separater'][key])
+            # print(df_temp)
             df_list = []
             if len(data)>1:
                 for i in range(1,len(data)):
@@ -146,7 +160,9 @@ class LogInterface:
             df_temp = pd.concat([df_temp,df_concat])
             # please make changes for bot hangedup
             filtered_rows = df_temp[df_temp['Next State'].apply(lambda states: 'Bot Hanged UP' in states)]
-            row_data = list(filtered_rows['AI bot got this data'])
+            # print(filtered_rows)
+            filtered_rows.to_dict('records')
+            row_data = filtered_rows.to_dict('records')
             data_response = {"status":True,"data":row_data,"msg":"data got"}
             # print(data_response)
         except Exception as e:
