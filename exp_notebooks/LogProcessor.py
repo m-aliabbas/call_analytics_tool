@@ -12,7 +12,6 @@ import streamlit as st
 # files_name = ["7C-D3-0A-1A-C3-C4_1676679530.txt"]
 # file_names= ["zipper.zip"]
 # file_name = '7C-D3-0A-1A-C3-C4_1676679530.txt'
-
 class LogAnalytics:
     def __init__(self):
         self.item_counts = None
@@ -39,7 +38,7 @@ class LogAnalytics:
         self.filings = str
         self.filers_name = []
         self.splitted_calls_3 = []
-        self.path = ""
+        self.path = "/home/idrak/Desktop/idrak_work/call_analytics_tool/uploaded_files/"
         self.state_dict = {
             "playing hello": "hello",
             "playing intro": "intro",
@@ -55,12 +54,11 @@ class LogAnalytics:
         self.mergerd_dict = {}
 
     def zip_extractor(self,file_names):     
-        path = ""    
         # opening the zip file in READ mode
         for filing in file_names:
-            with ZipFile(os.path.join(path,filing), 'r') as zip:
+            with open(os.path.join(self.path,filing), 'r') as zip:
                 # printing all the contents of the zip file
-                # zip.printdir()
+                zip.printdir()
             
                 # extracting all the files
                 # print('Extracting all the files now...')
@@ -173,7 +171,6 @@ class LogAnalytics:
         # get most common n-grams
         self.most_common_ngrams = ngrams.most_common(5)
 
-
     def none_separator_1(self,):
         data_lines = self.data.split('\n')
         results = []
@@ -181,6 +178,7 @@ class LogAnalytics:
         # "DNC", "Not Interested", "Ans Machine", "Transfer",
         states_to_find = ["DNC", "Not Interested", "Ans Machine","Hang Up","Not Qualified","Negative","Positive", "Transfer","Bot Hanged UP","No Answer","Caller Hanged Up"]
         phone_num = '123'
+        print(len(data_lines))
         for i in range(len(data_lines)):
             line = data_lines[i]
 
@@ -189,7 +187,11 @@ class LogAnalytics:
             if phone_num_match:
                 phone_num = phone_num_match.group(0).split(':')[1].strip()
                 result['Phone Number'] = phone_num_match.group(0).split(':')[1].strip()
-
+            if '------------ playing' in line:
+                line = line.replace("-","")
+                line = line.replace("playing","")
+                line = line.strip()
+                result['Current State'] = line
             # Detect AI bot data
             ai_bot_match = re.search(r"AI bot got this data = (.*)", line)
             if ai_bot_match:
@@ -226,12 +228,13 @@ class LogAnalytics:
         if len(results) > 0:
 
             self.df_temp = pd.DataFrame(results)
+            print(self.df_temp)
             # st.dataframe(df)
             # df = df.dropna()
             # df.to_csv(f'{file_name[:-4]}_processed.csv', index=False)
         else:
             self.df_temp = pd.DataFrame()
-            print(f"No results found in {file_name}")
+            print(f"No results found in")
 
 
     def none_separator_2(self,):
