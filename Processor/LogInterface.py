@@ -101,7 +101,7 @@ class LogInterface:
             df_temp = pd.concat([df_temp,df_concat])
             df_temp['length'] = df_temp['AI bot got this data'].apply(self.word_counts)
             if not direct_flag:
-                df_temp= df_temp[df_temp['length']>3]
+                df_temp= df_temp[df_temp['length']>=2]
 
             if state != 'all':
                 counting = []
@@ -113,13 +113,7 @@ class LogInterface:
             else:    
                 counting =    df_temp['AI bot got this data'].apply(cleanify).value_counts()
                 counters = counting.to_dict()
-            lister = []
-            listing=[]
-            for keys,values in counters.items():
-                lister = keys.split()
-                for item in lister:
-                    if len(item) == 1:
-                        listing.append(item)
+
 
             data_response = {"status":True,"data":counters,"msg":"data got"}
             
@@ -129,7 +123,7 @@ class LogInterface:
         return data_response
         
     def get_none_responis_word_freq(self,state = 'all',direct_flag=True):
-        data = self.get_none_responsis_pharase_freq(direct_flag=direct_flag)
+        data = self.get_none_responsis_pharase_freq(direct_flag=direct_flag,state=state)
         if data['status']:
             data = data['data']
             data = list(data.keys())

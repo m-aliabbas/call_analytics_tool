@@ -165,6 +165,13 @@ def get_phrase_freq():
     json_data = parse_json(data)
     return json_data
 
+@app.get("/get_word_freq/{state}")
+def get_word_freq(state:str):
+    data=LogInterface.get_none_responis_word_freq(state=state)
+    data = {'data': data}
+    json_data = parse_json(data)
+    return json_data
+
 @app.get("/get_word_freq")
 def get_word_freq():
     data=LogInterface.get_none_responis_word_freq()
