@@ -54,8 +54,40 @@ class LogInterface:
 
     def get_complete_data(self,):
         data = self.DB.find()
-        # print(data)
-        return data
+        data_lists = data
+        total_calls = 0
+        valid_calls = 0
+        call_drop = 0
+        Caller_ID_List = []
+        Transcript_List = []
+        Disposition_List = []
+        File_ID_List = []
+        for data_list in data_lists:
+            file_id = data_list['file_id']
+            total_calls += data_list['total_calls']
+            valid_calls += data_list['valid_calls']
+            call_drop += data_list['call_drop']
+            # print(data_list['Disposition'][file_id])
+            Caller_ID_List += data_list['Caller_ID'][file_id]
+            Transcript_List += data_list['Transcript'][file_id]
+            Disposition_List += data_list['Disposition'][file_id]
+            temp = []
+            print(file_id,len(data_list['Disposition'][file_id]),len(data_list['Transcript'][file_id]),len(data_list['Caller_ID'][file_id]),)
+            File_ID_List += [os.path.basename(file_id)[:-4]]*len(data_list['Caller_ID'][file_id])
+        # this is not a perfect thing; Only adding because of less usecase
+        min_number = min(len(Caller_ID_List),len(Disposition_List),len(Transcript_List),len(File_ID_List))
+
+        complete_data = {
+            'total_calls':total_calls,
+            'valid_calls':valid_calls,
+            'call_drop' : call_drop,
+            'disposition_table':{'caller_id':Caller_ID_List[:min_number],
+                                 'transcript':Transcript_List[:min_number],
+                                 'disposition':Disposition_List[:min_number],
+                                 'file_id':File_ID_List[:min_number],
+                                 }
+        }
+        return complete_data
 
     def get_particular_data(self,file_id):
         data = self.DB.find({'file_id':file_id})
@@ -102,7 +134,7 @@ class LogInterface:
             df_temp['length'] = df_temp['AI bot got this data'].apply(self.word_counts)
             if not direct_flag:
                 df_temp= df_temp[df_temp['length']>=2]
-
+            print(df_temp.columns)
             if state != 'all':
                 counting = []
                 for index, row in df_temp.iterrows():         
@@ -114,8 +146,8 @@ class LogInterface:
                 counting =    df_temp['AI bot got this data'].apply(cleanify).value_counts()
                 counters = counting.to_dict()
 
-
-            data_response = {"status":True,"data":counters,"msg":"data got"}
+            sorted_frequency_dict = {k: v for k, v in sorted(counters.items(), key=lambda item: item[1], reverse=True)}
+            data_response = {"status":True,"data":sorted_frequency_dict,"msg":"data got"}
             
         except Exception as e:
             print(e)

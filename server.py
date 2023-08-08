@@ -137,6 +137,7 @@ def save_uploaded_file(file: UploadFile) -> str:
 @app.get("/get_full_log")
 def get_full_data():
     data=LogInterface.get_complete_data()
+
     data = {'data': data}
     json_data = parse_json(data)
     return json_data
