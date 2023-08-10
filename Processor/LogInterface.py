@@ -24,7 +24,7 @@ class LogInterface:
         self.log_processor = LogAnalytics()
         self.DB = Mongo_DB(address='mongodb://localhost:27017/',
                  db_name='call_analytics_tool',
-                 collection_name='log_record20',)
+                 collection_name='log_record22',)
 
     
     def insert_to_db(self,file_name):
