@@ -125,7 +125,7 @@ async def create_upload_files(files: List[UploadFile] = File(...)):
         new_file_list = zip_extractor_1(file_path)
         new_file_list.pop(0)
         for path in new_file_list:
-            status,msg = interface.get_diarizer_response(file_path)
+            status,msg = interface.get_diarizer_response(path)
             print(msg)
     return {'status': status}
 
