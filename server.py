@@ -170,6 +170,14 @@ def get_full_data():
     json_data = parse_json(data)
     return json_data
 
+@app.get("/get_most_phrases")
+def get_most_phrases():
+    data=LogInterface.get_most_phrases()
+
+    data = {'data': data}
+    json_data = parse_json(data)
+    return json_data
+
 @app.get("/get_states")
 def get_all_states():
     # write a method for it in log interface

@@ -6,6 +6,7 @@ import os
 import re
 import pandas as pd
 from collections import Counter
+import itertools
 
 def cleanify(text):
     # Convert the text to lowercase
@@ -92,6 +93,45 @@ class LogInterface:
     def get_particular_data(self,file_id):
         data = self.DB.find({'file_id':file_id})
         return data
+    
+
+    def get_most_phrases(self,):
+
+        data = self.DB.find({},['Transcript','file_id'])
+        dat = []
+        id = [] 
+        for datas in data:
+            dat.append(datas['Transcript'])
+        all_values = []
+        for record in dat:
+            for value in record.values():
+                all_values.append(value)
+        
+        merged_list = []
+        for lst in all_values:
+            for item in lst:
+                merged_list.append(item)
+        filtered_phrases = [phrase for phrase in merged_list if len(phrase.split()) >= 4]
+
+        phrase_counts = Counter(filtered_phrases)
+        dict = {}
+        for phrase,count in phrase_counts.items():
+            dict[phrase] = count
+        
+        sorted_items = sorted(dict.items(), key=lambda x: x[1], reverse=True)
+
+        top_5_values = set()  # To keep track of unique top values
+        result = {}
+
+        for key, value in sorted_items:
+            if value not in top_5_values:
+                top_5_values.add(value)
+            if len(top_5_values) >= 5:
+                break
+            result[key] = value
+        return result
+    
+
     def get_states(self):
         data = self.DB.find({},['AI None Separater','file_id'])
         try:
