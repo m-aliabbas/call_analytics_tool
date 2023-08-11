@@ -10,7 +10,7 @@ class Interface:
         df_dict = pd.read_json(keyword_file).to_dict()
         keywords = extract_phrases(df_dict)
         self.call_processor = CallProcessor(keywords=keywords)
-        self.DB = Mongo_DB() # paramaeters are inserted in Construct
+        # self.DB = Mongo_DB() # paramaeters are inserted in Construct
         self.DB = Mongo_DB(address='mongodb://localhost:27017/',
                  db_name='call_analytics_tool',
                  collection_name='call_record5',)
@@ -82,8 +82,28 @@ class Interface:
         data = self.DB.find({},['sequence_dict','file_id'])
         return data
 
+    # def get_particular_data(self,file_id):
+    #     data = self.DB.find({'file_id':file_id})
+    #     print(data)
+    #     return data
+    
     def get_particular_data(self,file_id):
         data = self.DB.find({'file_id':file_id})
+        splitted_transcript= data['data'][0]['spliited_trans']
+        id =file_id
+        transcript_list=splitted_transcript['splitted_transcript'][list(splitted_transcript['splitted_transcript'].keys())[0]]
+        speakers_list=splitted_transcript['speakers'][list(splitted_transcript['speakers'].keys())[0]]
+        bot_keywords = ["my name is", "hi this is", "hi! this is","its","i am ","amy","ammy","backy","becky","Ducky","Ethen","this is",]
+        for key_word in bot_keywords:
+            for index,transcript in enumerate(transcript_list):
+                if key_word in transcript:
+                    print(transcript,index)
+        speaker_name = speakers_list[index]
+        for i,speaker in enumerate(speakers_list):
+            if speaker_name == speaker:
+                speakers_list[i] = 'Agent'
+            else:
+                speakers_list[i] = 'Customer'
         print(data)
         return data
         
