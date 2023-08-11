@@ -3,7 +3,7 @@ import pymongo
 class Mongo_DB:
     def __init__(self,address='mongodb://localhost:27017/',
                  db_name='call_analytics_tool',
-                 collection_name='call_record5',):
+                 collection_name='call_record',):
         self.myclient = pymongo.MongoClient(address)
         self.mydb = self.myclient[db_name]
         self.collection = self.mydb[collection_name]
