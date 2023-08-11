@@ -129,7 +129,7 @@ import os
 #             print(msg)
 #     return {'status': status}
 
-@app.post("/ /")
+@app.post("/uploadfiles/")
 async def create_upload_files(files: List[UploadFile] = File(...)):
     
     data = []
