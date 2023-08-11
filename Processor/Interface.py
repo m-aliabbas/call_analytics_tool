@@ -89,22 +89,25 @@ class Interface:
     
     def get_particular_data(self,file_id):
         data = self.DB.find({'file_id':file_id})
-        splitted_transcript= data['data'][0]['spliited_trans']
+        # print(data)
+        splitted_transcript= data[0]['spliited_trans']
         id =file_id
         transcript_list=splitted_transcript['splitted_transcript'][list(splitted_transcript['splitted_transcript'].keys())[0]]
         speakers_list=splitted_transcript['speakers'][list(splitted_transcript['speakers'].keys())[0]]
-        bot_keywords = ["my name is", "hi this is", "hi! this is","its","i am ","amy","ammy","backy","becky","Ducky","Ethen","this is",]
+        bot_keywords = ["Senior Citizens Care","Senior Benefits"]
+        index1 = 0 
         for key_word in bot_keywords:
             for index,transcript in enumerate(transcript_list):
                 if key_word in transcript:
-                    print(transcript,index)
-        speaker_name = speakers_list[index]
+                    index1=index
+        speaker_name = speakers_list[index1]
         for i,speaker in enumerate(speakers_list):
+            print(1,speaker_name,speaker)
             if speaker_name == speaker:
                 speakers_list[i] = 'Agent'
             else:
                 speakers_list[i] = 'Customer'
-        print(data)
+        # print(data)
         return data
         
 

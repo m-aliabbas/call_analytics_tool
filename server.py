@@ -116,7 +116,7 @@ async def create_upload_files(files: List[UploadFile] = File(...)):
 
     for file in files:
         # Save the uploaded file
-        file_path = save_uploaded_log_file(file)
+        file_path = save_uploaded_file(file)
         # call zip function here
         # it should return all file in zip and extract 
         # put the list return to interface insert db
@@ -125,7 +125,7 @@ async def create_upload_files(files: List[UploadFile] = File(...)):
         new_file_list = zip_extractor_1(file_path)
         new_file_list.pop(0)
         for path in new_file_list:
-            status,msg = interface.get_diarizer_response(file_path)
+            status,msg = interface.get_diarizer_response(path)
             print(msg)
     return {'status': status}
 
