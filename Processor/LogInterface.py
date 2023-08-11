@@ -94,42 +94,33 @@ class LogInterface:
         data = self.DB.find({'file_id':file_id})
         return data
     
+    
 
     def get_most_phrases(self,):
+        data = self.DB.find({},)
+        try:
+            # Extract and flatten all 'Transcript' values
+            all_phrases = [phrase for record in [entry['Transcript'] for entry in data] for value in record.values() for phrase in value]
 
-        data = self.DB.find({},['Transcript','file_id'])
-        dat = []
-        id = [] 
-        for datas in data:
-            dat.append(datas['Transcript'])
-        all_values = []
-        for record in dat:
-            for value in record.values():
-                all_values.append(value)
-        
-        merged_list = []
-        for lst in all_values:
-            for item in lst:
-                merged_list.append(item)
-        filtered_phrases = [phrase for phrase in merged_list if len(phrase.split()) >= 4]
+            # Filter phrases longer than 3 words
+            filtered_phrases = [phrase for phrase in all_phrases if len(phrase.split()) >= 4]
 
-        phrase_counts = Counter(filtered_phrases)
-        dict = {}
-        for phrase,count in phrase_counts.items():
-            dict[phrase] = count
-        
-        sorted_items = sorted(dict.items(), key=lambda x: x[1], reverse=True)
+            # Count occurrences of each phrase
+            phrase_counts = Counter(filtered_phrases)
 
-        top_5_values = set()  # To keep track of unique top values
-        result = {}
+            # Sort phrases by their counts
+            sorted_phrases = sorted(phrase_counts.items(), key=lambda x: x[1], reverse=True)
 
-        for key, value in sorted_items:
-            if value not in top_5_values:
-                top_5_values.add(value)
-            if len(top_5_values) >= 5:
-                break
-            result[key] = value
-        return result
+            # Extract only the top 5 phrases
+            result = dict(sorted_phrases[:5])
+
+            data_response = {"status": True, "data": result, "msg": "data got"}
+
+        except Exception as e:
+            print(e)
+            data_response = {"status":False,"data":{},"msg":f"You got the error {e}"}
+
+        return data_response
     
 
     def get_states(self):
@@ -157,6 +148,7 @@ class LogInterface:
         return data_response
     def word_counts(self,text):
         return len(text.split(' '))
+    
     def get_none_responsis_pharase_freq(self,direct_flag = False, state = 'all'):
         data = self.DB.find({},['AI None Separater','file_id'])
         try:
