@@ -1,7 +1,7 @@
 import pymongo
 
 class Mongo_DB:
-    def __init__(self,):
+    def __init__(self,address,db_name,collection_name,):
         self.myclient = pymongo.MongoClient(address)
         self.mydb = self.myclient[db_name]
         self.collection = self.mydb[collection_name]
