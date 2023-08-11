@@ -102,7 +102,7 @@ def get_diarizer_server_response(self,file_path):
 
 import os
 
-@app.post("/uploadfiles/")
+@app.post("/ /")
 async def create_upload_files(files: List[UploadFile] = File(...)):
     data = []
     for file in files:
