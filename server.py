@@ -102,43 +102,43 @@ def get_diarizer_server_response(self,file_path):
 
 import os
 
-# def zip_extractor_1(file_names):     
-#     # opening the zip file in READ mode
-#     file_address = []
-#     with zipfile.ZipFile(file_names, "r") as zip_ref:
-#         for file_info in zip_ref.infolist():
-#             extracted_path = zip_ref.extract(file_info.filename)
-#             file_address.append(extracted_path)
-#     return file_address
-
-# @app.post("/uploadfiles/")
-# async def create_upload_files(files: List[UploadFile] = File(...)):
-
-#     for file in files:
-#         # Save the uploaded file
-#         file_path = save_uploaded_log_file(file)
-#         # call zip function here
-#         # it should return all file in zip and extract 
-#         # put the list return to interface insert db
-#         # or pass one y one
-
-#         new_file_list = zip_extractor_1(file_path)
-#         new_file_list.pop(0)
-#         for path in new_file_list:
-#             status,msg = interface.get_diarizer_response(file_path)
-#             print(msg)
-#     return {'status': status}
+def zip_extractor_1(file_names):     
+    # opening the zip file in READ mode
+    file_address = []
+    with zipfile.ZipFile(file_names, "r") as zip_ref:
+        for file_info in zip_ref.infolist():
+            extracted_path = zip_ref.extract(file_info.filename)
+            file_address.append(extracted_path)
+    return file_address
 
 @app.post("/uploadfiles/")
 async def create_upload_files(files: List[UploadFile] = File(...)):
-    
-    data = []
+
     for file in files:
         # Save the uploaded file
-        file_path = save_uploaded_file(file)
-        print(file_path)
-        status,msg = interface.get_diarizer_response(file_path)
-    return {'status': 'done'}
+        file_path = save_uploaded_log_file(file)
+        # call zip function here
+        # it should return all file in zip and extract 
+        # put the list return to interface insert db
+        # or pass one y one
+
+        new_file_list = zip_extractor_1(file_path)
+        new_file_list.pop(0)
+        for path in new_file_list:
+            status,msg = interface.get_diarizer_response(file_path)
+            print(msg)
+    return {'status': status}
+
+# @app.post("/uploadfiles/")
+# async def create_upload_files(files: List[UploadFile] = File(...)):
+    
+#     data = []
+#     for file in files:
+#         # Save the uploaded file
+#         file_path = save_uploaded_file(file)
+#         print(file_path)
+#         status,msg = interface.get_diarizer_response(file_path)
+#     return {'status': 'done'}
 
 
 def save_uploaded_file(file: UploadFile) -> str:
