@@ -165,7 +165,7 @@ class LogInterface:
             df_temp = pd.concat([df_temp,df_concat])
             df_temp['length'] = df_temp['AI bot got this data'].apply(self.word_counts)
             if not direct_flag:
-                df_temp= df_temp[df_temp['length']>=2]
+                df_temp= df_temp[df_temp['length']>=3]
             print(df_temp.columns)
             if state != 'all':
                 counting = []
