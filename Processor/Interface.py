@@ -96,7 +96,7 @@ class Interface:
         id =file_id
         transcript_list=splitted_transcript['splitted_transcript'][list(splitted_transcript['splitted_transcript'].keys())[0]]
         speakers_list=splitted_transcript['speakers'][list(splitted_transcript['speakers'].keys())[0]]
-        bot_keywords = ["Senior Citizens Care","Senior Benefits"]
+        bot_keywords = ["Senior Citizens Care","Senior Benefits","US Auto care","Auto care","Home Improvement Services","American Solar","Medicare department","health care benefits","Auto warrant processing center","local energy advisers","American senior citizen care"]
         index1 = 0 
         for key_word in bot_keywords:
             for index,transcript in enumerate(transcript_list):
