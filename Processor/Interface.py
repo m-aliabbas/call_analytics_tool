@@ -5,6 +5,8 @@ from DataSource.Mongo_DB import Mongo_DB
 import requests
 import json
 import os
+from collections import Counter
+import re
 class Interface:
     def __init__(self,keyword_file='Example_Data/insurance.json'):
         df_dict = pd.read_json(keyword_file).to_dict()
@@ -109,6 +111,46 @@ class Interface:
                 speakers_list[i] = 'Customer'
         # print(data)
         return data
+    
+
+
+    def get_most_common(self):
+        data = self.DB.find({},['spliited_trans'])
+
+        try:
+            # Initialize an empty list to store all cleaned phrases
+            all_phrases = []
+
+            # Loop through each entry in the data list to collect all phrases
+            for entry in data:
+                for key in entry['spliited_trans']['splitted_transcript']:
+                    phrases = entry['spliited_trans']['splitted_transcript'][key]
+                    for phrase in phrases:
+                        all_phrases.append(phrase)
+
+            # Clean up each phrase by removing special characters and Filter out phrases with less than 4 words
+            cleaned_phrases = []
+            for phrase in all_phrases:
+                if len(phrase.split()) >= 4:
+                    clean_phrase = re.sub(r'[^a-zA-Z0-9\s]', '', phrase)
+                    cleaned_phrases.append(clean_phrase)
+
+            # Count occurrences of each phrase
+            phrase_counts = Counter(cleaned_phrases)
+
+            # Sort phrases by their counts
+            sorted_phrases = sorted(phrase_counts.items(), key=lambda x: x[1], reverse=True)
+
+            # Extract only the top 5 phrases
+            result = dict(sorted_phrases[:5])
+
+            data_response = {"status": True, "data": result, "msg": "data got"}
+
+        except Exception as e:
+            print(e)
+            data_response = {"status":False,"data":{},"msg":f"You got the error {e}"}
+
+        return data_response
         
 
 if __name__ == "__main__":

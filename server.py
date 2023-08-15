@@ -178,6 +178,15 @@ def get_most_phrases():
     json_data = parse_json(data)
     return json_data
 
+
+@app.get("/get_most_common")
+def get_most_common():
+    data=interface.get_most_common()
+
+    data = {'data': data}
+    json_data = parse_json(data)
+    return json_data
+
 @app.get("/get_states")
 def get_all_states():
     # write a method for it in log interface
