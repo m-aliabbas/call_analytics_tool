@@ -338,5 +338,5 @@ class LogInterface:
 
 # files_name = ["7C-D3-0A-1A-C3-C4_1676679530.txt"]
 # logsinterface = LogInterface()
-# logsinterface.insert_to_db(files_name)
+# logsinterface.insert_to_db(files_name)cl
 # logsinterface.get_none_responsis_pharase_freq()
