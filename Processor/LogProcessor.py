@@ -216,6 +216,12 @@ class LogAnalytics:
                 line = line.replace("playing","")
                 line = line.strip()
                 result['Current State'] = line
+            list_dat = ['No Answer','- DNC -','- Not Qualified -','- Not Interested -','- Ans Machine -','Transferring call']
+            for dat in list_dat:
+                if dat in line:
+                    line = line.replace("-","")
+                    line = line.strip()
+                    result['Current State'] = line
             # Detect AI bot data
             ai_bot_match = re.search(r"AI bot got this data = (.*)", line)
             if ai_bot_match:
