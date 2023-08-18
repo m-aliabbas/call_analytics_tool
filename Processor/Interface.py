@@ -6,7 +6,13 @@ import requests
 import json
 import os
 from collections import Counter
+from Processor.similarity import SimilarityFinder
 import re
+
+
+Similarity = SimilarityFinder()
+bot_sentences = Similarity.bot_sentences
+
 class Interface:
     def __init__(self,keyword_file='Example_Data/insurance.json'):
         df_dict = pd.read_json(keyword_file).to_dict()
@@ -89,27 +95,48 @@ class Interface:
     #     print(data)
     #     return data
     
+    # def get_particular_data(self,file_id):
+    #     data = self.DB.find({'file_id':file_id})
+    #     # print(data)
+    #     splitted_transcript= data[0]['spliited_trans']
+    #     id =file_id
+    #     transcript_list=splitted_transcript['splitted_transcript'][list(splitted_transcript['splitted_transcript'].keys())[0]]
+    #     speakers_list=splitted_transcript['speakers'][list(splitted_transcript['speakers'].keys())[0]]
+    #     bot_keywords = ["Senior Citizens Care","Senior Benefits","US Auto care","Auto care","Home Improvement Services","American Solar","Medicare department","health care benefits","Auto warrant processing center","local energy advisers","American senior citizen care"]
+    #     index1 = 0 
+    #     for key_word in bot_keywords:
+    #         for index,transcript in enumerate(transcript_list):
+    #             if key_word in transcript:
+    #                 index1=index
+    #     speaker_name = speakers_list[index1]
+    #     for i,speaker in enumerate(speakers_list):
+    #         print(1,speaker_name,speaker)
+    #         if speaker_name == speaker:
+    #             speakers_list[i] = 'Agent'
+    #         else:
+    #             speakers_list[i] = 'Customer'
+    #     # print(data)
+    #     return data
+    
+
+
     def get_particular_data(self,file_id):
         data = self.DB.find({'file_id':file_id})
-        # print(data)
-        splitted_transcript= data[0]['spliited_trans']
+        splitted_transcript= data['data'][0]['spliited_trans']
         id =file_id
         transcript_list=splitted_transcript['splitted_transcript'][list(splitted_transcript['splitted_transcript'].keys())[0]]
         speakers_list=splitted_transcript['speakers'][list(splitted_transcript['speakers'].keys())[0]]
-        bot_keywords = ["Senior Citizens Care","Senior Benefits","US Auto care","Auto care","Home Improvement Services","American Solar","Medicare department","health care benefits","Auto warrant processing center","local energy advisers","American senior citizen care"]
-        index1 = 0 
-        for key_word in bot_keywords:
-            for index,transcript in enumerate(transcript_list):
-                if key_word in transcript:
-                    index1=index
-        speaker_name = speakers_list[index1]
-        for i,speaker in enumerate(speakers_list):
-            print(1,speaker_name,speaker)
-            if speaker_name == speaker:
-                speakers_list[i] = 'Agent'
+        
+        bot_indexes = Similarity.similarityFinder(bot_sentences, transcript_list)
+        bot_indexes = {list(set(bot_indexes))}
+        
+        
+        for index ,speaker in enumerate(speakers_list):
+            if index in bot_indexes:
+                speakers_list[index] = 'Agent'
             else:
-                speakers_list[i] = 'Customer'
-        # print(data)
+                speakers_list[index] = 'Customer'
+        print(data)
         return data
     
 
