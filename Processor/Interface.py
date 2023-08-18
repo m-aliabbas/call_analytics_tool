@@ -122,13 +122,13 @@ class Interface:
 
     def get_particular_data(self,file_id):
         data = self.DB.find({'file_id':file_id})
-        splitted_transcript= data['data'][0]['spliited_trans']
+        splitted_transcript= data[0]['spliited_trans']
         id =file_id
         transcript_list=splitted_transcript['splitted_transcript'][list(splitted_transcript['splitted_transcript'].keys())[0]]
         speakers_list=splitted_transcript['speakers'][list(splitted_transcript['speakers'].keys())[0]]
         
         bot_indexes = Similarity.similarityFinder(bot_sentences, transcript_list)
-        bot_indexes = {list(set(bot_indexes))}
+        bot_indexes = list(set(bot_indexes))
         
         
         for index ,speaker in enumerate(speakers_list):
