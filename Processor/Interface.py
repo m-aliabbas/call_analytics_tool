@@ -15,7 +15,7 @@ class Interface:
         # self.DB = Mongo_DB() # paramaeters are inserted in Construct
         self.DB = Mongo_DB(address='mongodb://localhost:27017/',
                  db_name='call_analytics_tool',
-                 collection_name='call_record5',)
+                 collection_name='call_record7',)
     
     def get_diarizer_server_response(self,file_path):
         # Specify the URL of the FastAPI server

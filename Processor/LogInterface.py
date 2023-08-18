@@ -25,7 +25,7 @@ class LogInterface:
         self.log_processor = LogAnalytics()
         self.DB = Mongo_DB(address='mongodb://localhost:27017/',
                  db_name='call_analytics_tool',
-                 collection_name='log_record22',)
+                 collection_name='log_record24',)
 
     
     def insert_to_db(self,file_name):
@@ -52,6 +52,74 @@ class LogInterface:
         else:
             print('Error')
             return False,'Something went wrong'
+        
+
+    def get_new_data(self,):
+        # Query the database and retrieve all records
+        data = self.DB.find()
+
+        # Initialize an empty list to store the results
+        results = {}
+
+        # Loop through each entry (or record) in the data
+        for entry in data:
+            
+            # Extract the 'AI None Separater' dictionary from the current entry
+            record = entry['AI None Separater']
+            
+            # Loop through all values in the 'AI None Separater' dictionary
+            for value in record.values():
+                
+                # Assuming each value is a list (or iterable), loop through its elements
+                for phrase in value:
+                    
+                    # Append each element (phrase) to the results list
+                    results[phrase['Phone Number']] = phrase['Current State'] 
+        return data
+    
+    def get_all_logs(self,):
+        data = self.DB.find()
+        data_lists = data
+        total_calls = 0
+        valid_calls = 0
+        call_drop = 0
+        Caller_ID_List = []
+        Transcript_List = []
+        Disposition_List = []
+        File_ID_List = []
+        states_number = []
+        for data_list in data_lists:
+            file_id = data_list['file_id']
+            states_number.append(data_list['states_number'][file_id])
+            total_calls += data_list['total_calls']
+            valid_calls += data_list['valid_calls']
+            call_drop += data_list['call_drop']
+            # print(data_list['Disposition'][figet_all_logsle_id])
+            Caller_ID_List += data_list['Caller_ID'][file_id]
+            Transcript_List += data_list['Transcript'][file_id]
+            Disposition_List += data_list['Disposition'][file_id]
+            temp = []
+            # print(file_id,len(data_list['Disposition'][file_id]),len(data_list['Transcript'][file_id]),len(data_list['Caller_ID'][file_id]),)
+            File_ID_List += [os.path.basename(file_id)[:-4]]*len(data_list['Caller_ID'][file_id])
+        merged_dict = {}
+        for d in states_number:
+            merged_dict.update(d)
+        # this is not a perfect thing; Only adding because of less usecase
+        min_number = min(len(Caller_ID_List),len(Disposition_List),len(Transcript_List),len(File_ID_List))
+
+        complete_data = {
+            'total_calls':total_calls,
+            'valid_calls':valid_calls,
+            'call_drop' : call_drop,
+            'disposition_table':{'caller_id':Caller_ID_List[:min_number],
+                                 'transcript':Transcript_List[:min_number],
+                                 'disposition':Disposition_List[:min_number],
+                                 'file_id':File_ID_List[:min_number],
+                                 'number_data':merged_dict
+                                 }
+        }
+        return data
+    
 
     def get_complete_data(self,):
         data = self.DB.find()
@@ -115,6 +183,45 @@ class LogInterface:
             result = dict(sorted_phrases[:5])
 
             data_response = {"status": True, "data": result, "msg": "data got"}
+
+        except Exception as e:
+            print(e)
+            data_response = {"status":False,"data":{},"msg":f"You got the error {e}"}
+
+        return data_response
+    
+    # Other method
+    # def count_words(self,word_list):
+    #     # Initialize an empty dictionary to store counts
+    #     word_count = {}
+        
+    #     # Iterate over the list and update counts
+    #     for word in word_list:
+    #         word_count[word] = word_count.get(word, 0) + 1
+
+    #     # Convert the dictionary to the desired format
+    #     result = []
+    #     for word, count in word_count.items():
+    #         dictionary = {"title": word, "value": count}
+    #         result.append(dictionary)
+        
+    #     return result
+    
+    def count_words(self,word_list):
+        return dict(Counter(word_list))
+    
+
+    def get_disposition_freq(self,):
+        data = self.DB.find({},)
+        try:
+            # Extract and flatten all 'Transcript' values
+            all_phrases = [phrase for record in [entry['Disposition'] for entry in data] for value in record.values() for phrase in value]
+            
+            # Sort phrases by their counts
+            word_counts = self.count_words(all_phrases)
+
+            # Return the result
+            data_response = {"status": True, "data": word_counts, "msg": "data got"}
 
         except Exception as e:
             print(e)

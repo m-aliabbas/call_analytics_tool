@@ -170,9 +170,25 @@ def get_full_data():
     json_data = parse_json(data)
     return json_data
 
+@app.get("/get_new_data")
+def get_new_data():
+    data=LogInterface.get_new_data()
+
+    data = {'data': data}
+    json_data = parse_json(data)
+    return json_data
+
 @app.get("/get_most_phrases")
 def get_most_phrases():
     data=LogInterface.get_most_phrases()
+
+    data = {'data': data}
+    json_data = parse_json(data)
+    return json_data
+
+@app.get("/get_all_logs")
+def get_all_logs():
+    data=LogInterface.get_all_logs()
 
     data = {'data': data}
     json_data = parse_json(data)
@@ -229,6 +245,13 @@ def get_word_freq():
 def get_bot_hanged():
     data=LogInterface.get_none_bot_hanged_up()
     data = {'data': data}
+    json_data = parse_json(data)
+    return json_data
+
+
+@app.get("/get_disposition_freq")
+def get_disposition_freq():
+    data=LogInterface.get_disposition_freq()
     json_data = parse_json(data)
     return json_data
 
