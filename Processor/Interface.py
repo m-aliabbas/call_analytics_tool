@@ -5,6 +5,8 @@ from DataSource.Mongo_DB import Mongo_DB
 import requests
 import json
 import os
+from collections import Counter
+import re
 class Interface:
     def __init__(self,keyword_file='Example_Data/insurance.json'):
         df_dict = pd.read_json(keyword_file).to_dict()
@@ -13,7 +15,7 @@ class Interface:
         # self.DB = Mongo_DB() # paramaeters are inserted in Construct
         self.DB = Mongo_DB(address='mongodb://localhost:27017/',
                  db_name='call_analytics_tool',
-                 collection_name='call_record5',)
+                 collection_name='call_record7',)
     
     def get_diarizer_server_response(self,file_path):
         # Specify the URL of the FastAPI server
@@ -89,23 +91,66 @@ class Interface:
     
     def get_particular_data(self,file_id):
         data = self.DB.find({'file_id':file_id})
-        splitted_transcript= data['data'][0]['spliited_trans']
+        # print(data)
+        splitted_transcript= data[0]['spliited_trans']
         id =file_id
         transcript_list=splitted_transcript['splitted_transcript'][list(splitted_transcript['splitted_transcript'].keys())[0]]
         speakers_list=splitted_transcript['speakers'][list(splitted_transcript['speakers'].keys())[0]]
-        bot_keywords = ["my name is", "hi this is", "hi! this is","its","i am ","amy","ammy","backy","becky","Ducky","Ethen","this is",]
+        bot_keywords = ["Senior Citizens Care","Senior Benefits","US Auto care","Auto care","Home Improvement Services","American Solar","Medicare department","health care benefits","Auto warrant processing center","local energy advisers","American senior citizen care"]
+        index1 = 0 
         for key_word in bot_keywords:
             for index,transcript in enumerate(transcript_list):
                 if key_word in transcript:
-                    print(transcript,index)
-        speaker_name = speakers_list[index]
+                    index1=index
+        speaker_name = speakers_list[index1]
         for i,speaker in enumerate(speakers_list):
+            print(1,speaker_name,speaker)
             if speaker_name == speaker:
                 speakers_list[i] = 'Agent'
             else:
                 speakers_list[i] = 'Customer'
-        print(data)
+        # print(data)
         return data
+    
+
+
+    def get_most_common(self):
+        data = self.DB.find({},['spliited_trans'])
+
+        try:
+            # Initialize an empty list to store all cleaned phrases
+            all_phrases = []
+
+            # Loop through each entry in the data list to collect all phrases
+            for entry in data:
+                for key in entry['spliited_trans']['splitted_transcript']:
+                    phrases = entry['spliited_trans']['splitted_transcript'][key]
+                    for phrase in phrases:
+                        all_phrases.append(phrase)
+
+            # Clean up each phrase by removing special characters and Filter out phrases with less than 4 words
+            cleaned_phrases = []
+            for phrase in all_phrases:
+                if len(phrase.split()) >= 4:
+                    clean_phrase = re.sub(r'[^a-zA-Z0-9\s]', '', phrase)
+                    cleaned_phrases.append(clean_phrase)
+
+            # Count occurrences of each phrase
+            phrase_counts = Counter(cleaned_phrases)
+
+            # Sort phrases by their counts
+            sorted_phrases = sorted(phrase_counts.items(), key=lambda x: x[1], reverse=True)
+
+            # Extract only the top 5 phrases
+            result = dict(sorted_phrases[:5])
+
+            data_response = {"status": True, "data": result, "msg": "data got"}
+
+        except Exception as e:
+            print(e)
+            data_response = {"status":False,"data":{},"msg":f"You got the error {e}"}
+
+        return data_response
         
 
 if __name__ == "__main__":

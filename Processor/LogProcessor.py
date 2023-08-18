@@ -39,6 +39,7 @@ class LogAnalytics:
         self.filers_name = []
         self.splitted_calls_3 = []
         self.path = "/home/idrak/Desktop/idrak_work/call_analytics_tool/uploaded_files/"
+        #put keywrods here
         self.state_dict = {
             "playing hello": "hello",
             "playing intro": "intro",
@@ -52,6 +53,7 @@ class LogAnalytics:
         self.df = ""
         self.data =""
         self.mergerd_dict = {}
+        self.new_dict= {}
 
     def zip_extractor(self,file_names):     
         # opening the zip file in READ mode
@@ -121,6 +123,28 @@ class LogAnalytics:
             # print(self.state_seq)
             # self.state_seq_call.clear()
 
+
+    def new_states_counter(self,):
+        # getting all states from a call storing into list state_seq
+        for call in self.calls:
+            state_seq_call = []
+        
+            for line in call.splitlines():
+                # check if iterated line exists in state's list. Then append it in sequence list
+                if "Incoming:" in line:
+                    number = line.split(" ")[1]
+                
+                if line in self.state_str:   
+                    state_seq_call.append(line.lower())
+                
+                news = []
+                for states in state_seq_call:
+                    if '------------ playing' in states:
+                        states = states.replace("-","")
+                        states = states.replace("playing","")
+                        states = states.strip() 
+                        news.append(states)
+                        self.new_dict[number] = news  
 
     def countValidCalls(self):
         for call_sequence in self.state_seq:
@@ -307,7 +331,7 @@ class LogAnalytics:
 
         # Display in One Dataframe
         try:
-            df_number_data = {"file_id":self.filings,"Caller_ID":{self.filings:numbers}, "Transcript":{self.filings:number_trans}, "Disposition":{self.filings:number_dis}, "AI None Separater":{self.filings:self.mergerd_dict}, "total_calls":self.total_calls, "valid_calls":self.valid_calls, "total_states": self.count_class, "call_drop": self.call_drop }
+            df_number_data = {"file_id":self.filings,"Caller_ID":{self.filings:numbers}, "Transcript":{self.filings:number_trans},"states_number":{self.filings:self.new_dict}, "Disposition":{self.filings:number_dis}, "AI None Separater":{self.filings:self.mergerd_dict}, "total_calls":self.total_calls, "valid_calls":self.valid_calls, "total_states": self.count_class, "call_drop": self.call_drop }
             self.number_data = df_number_data       
         except:
             pass 
@@ -327,6 +351,7 @@ class LogAnalytics:
         self.countMostUsedPharses()
         self.none_separator_1()
         self.none_separator_2()
+        self.new_states_counter()
         self.numberData()
         self.df_temp = pd.DataFrame()
         self.mergerd_dict = {}
@@ -351,6 +376,7 @@ class LogAnalytics:
         self.filings = str
         self.filers_name = []
         self.splitted_calls_3 = []
+        self.new_dict= {}
 
         return self.number_data
     
