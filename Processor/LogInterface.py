@@ -256,6 +256,24 @@ class LogInterface:
     def word_counts(self,text):
         return len(text.split(' '))
     
+    def get_states_call_drops(self,class_name):
+        class_name = class_name.lower()
+        data = self.DB.find()
+        data_lists = data
+        states_number = []
+        for data_list in data_lists:
+            file_id = data_list['file_id']
+            states_number.append(data_list['states_number'][file_id])
+
+
+        last_items = [values[-1] for values in states_number[0].values() if values]
+
+        count = Counter(last_items)
+
+        new_counter = count[class_name]
+
+        return new_counter
+ 
     def get_none_responsis_pharase_freq(self,direct_flag = False, state = 'all'):
         data = self.DB.find({},['AI None Separater','file_id'])
         try:

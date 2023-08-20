@@ -248,6 +248,13 @@ def get_bot_hanged():
     json_data = parse_json(data)
     return json_data
 
+@app.get("/get_call_drop/{class_name}")
+def get_states_call_drops(class_name:str):
+    data=LogInterface.get_states_call_drops(class_name=class_name)
+    data = {'data': data}
+    json_data = parse_json(data)
+    return json_data
+
 
 @app.get("/get_disposition_freq")
 def get_disposition_freq():
