@@ -55,6 +55,7 @@ class LogAnalytics:
         self.mergerd_dict = {}
         self.new_dict= {}
 
+
     def zip_extractor(self,file_names):     
         # opening the zip file in READ mode
         for filing in file_names:
@@ -66,6 +67,7 @@ class LogAnalytics:
                 # print('Extracting all the files now...')
                 zip.extractall()
                 # print('Done!')
+
 
     def fileReader(self,file_name):
         
@@ -146,6 +148,7 @@ class LogAnalytics:
                         news.append(states)
                         self.new_dict[number] = news  
 
+
     def countValidCalls(self):
         for call_sequence in self.state_seq:
             if len(call_sequence)>=2:
@@ -194,6 +197,7 @@ class LogAnalytics:
 
         # get most common n-grams
         self.most_common_ngrams = ngrams.most_common(5)
+
 
     def none_separator_1(self,):
         data_lines = self.data.split('\n')
@@ -301,8 +305,6 @@ class LogAnalytics:
         merged_df = self.df_temp.merge(df, on='Phone Number', how='inner')
         merged_dict_temp=merged_df.to_dict('records')
         self.mergerd_dict = merged_dict_temp
-
-
 
 
     def numberData(self):
