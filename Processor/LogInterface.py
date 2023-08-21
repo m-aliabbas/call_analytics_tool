@@ -44,6 +44,7 @@ class LogInterface:
                 print('Error')
                 return False,'Something went wrong'
     
+
     def empty_db(self,):
         temp = self.DB.empty()
         if temp:
@@ -77,6 +78,7 @@ class LogInterface:
                     results[phrase['Phone Number']] = phrase['Current State'] 
         return data
     
+
     def get_all_logs(self,):
         data = self.DB.find()
         data_lists = data
@@ -158,12 +160,12 @@ class LogInterface:
         }
         return complete_data
 
+
     def get_particular_data(self,file_id):
         data = self.DB.find({'file_id':file_id})
         return data
     
     
-
     def get_most_phrases(self,):
         data = self.DB.find({},)
         try:
@@ -190,22 +192,6 @@ class LogInterface:
 
         return data_response
     
-    # Other method
-    # def count_words(self,word_list):
-    #     # Initialize an empty dictionary to store counts
-    #     word_count = {}
-        
-    #     # Iterate over the list and update counts
-    #     for word in word_list:
-    #         word_count[word] = word_count.get(word, 0) + 1
-
-    #     # Convert the dictionary to the desired format
-    #     result = []
-    #     for word, count in word_count.items():
-    #         dictionary = {"title": word, "value": count}
-    #         result.append(dictionary)
-        
-    #     return result
     
     def count_words(self,word_list):
         return dict(Counter(word_list))
@@ -253,9 +239,49 @@ class LogInterface:
             print(e)
             data_response = {"status":False,"data":[],"msg":f"You got the error {e}"}
         return data_response
+
+
     def word_counts(self,text):
         return len(text.split(' '))
-    
+
+
+    def get_states_call_drops(self,class_name):
+        try:
+            class_name = class_name.lower()
+            data = self.DB.find()
+
+            data_lists = data
+            states_number = []
+            total_calls = 0
+            valid_calls = 0
+            dicts = {}
+            for data_list in data_lists:
+                file_id = data_list['file_id']
+                total_calls += data_list['total_calls']
+                valid_calls += data_list['valid_calls']
+                states_number.append(data_list['states_number'][file_id])
+
+            # asssigning values to dict
+            dicts['total_calls'] = total_calls
+            dicts['valid_calls'] = valid_calls
+
+            last_items = [values[-1] for values in states_number[0].values() if values]
+
+            count = Counter(last_items)
+
+            if class_name == 'all':
+                dicts['call_drops'] = sum(count.values())
+            else:
+                dicts['call_drops'] = count[class_name]
+            
+            data_response = {"status":True,"data":dicts,"msg":"data got"}
+
+        except Exception as e:
+            data_response = {"status":True,"data":{},"msg":f"You got the error {e}"}
+
+        return data_response
+ 
+
     def get_none_responsis_pharase_freq(self,direct_flag = False, state = 'all'):
         data = self.DB.find({},['AI None Separater','file_id'])
         try:
@@ -292,7 +318,8 @@ class LogInterface:
             print(e)
             data_response = {"status":False,"data":{},"msg":f"You got the error {e}"}
         return data_response
-        
+
+
     def get_none_responis_word_freq(self,state = 'all',direct_flag=True):
         data = self.get_none_responsis_pharase_freq(direct_flag=direct_flag,state=state)
         if data['status']:
@@ -308,6 +335,7 @@ class LogInterface:
         else:
             data_response = {"status":False,"data":{},"msg":f"You got the error "}
         return data_response
+
 
     def get_none_bot_hanged_up(self):
         data = self.DB.find({},['AI None Separater','file_id'])
