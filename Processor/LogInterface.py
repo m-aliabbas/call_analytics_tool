@@ -364,7 +364,7 @@ class LogInterface:
         # print(data_response)
         return data_response
 
-# files_name = ["7C-D3-0A-1A-C3-C4_1676679530.txt","7C-D3-0A-1A-C3-56_1676588618.txt","7C-D3-0A-1A-C3-78_1676679544.txt","7C-D3-0A-1A-D3-A5_1676666312.txt"]
+# files_name = ["7C-D3-0A-1A-C3-C4_1676679530.txt"]
 # logsinterface = LogInterface()
 # logsinterface.insert_to_db(files_name)
 # logsinterface.get_none_responsis_pharase_freq()
