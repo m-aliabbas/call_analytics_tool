@@ -33,7 +33,7 @@ class LogAnalytics:
         self.state_seq = []
         self.trans_list = []
         self.transcripts = []
-        self.state_keywords = ['ello', 'ntro', 'nterested', 'AGE', 'Age', 'ransfer', 'achine', 'reeting', 'reetings', 'itch', 'OPT', 'arrier', 'panish', 'DNC', 'dnc', 'busy', 'Busy', 'ositive', 'egative', 'XFER', 'ualifies', 'ualified']
+        self.state_keywords = ['ello', 'ntro', 'nterested', 'AGE','transferring call', 'Age', 'ransfer', 'achine', 'reeting', 'reetings', 'itch', 'OPT', 'arrier', 'panish', 'DNC', 'dnc', 'busy', 'Busy', 'ositive', 'egative', 'XFER', 'ualifies', 'ualified']
         self.number_data = {}
         self.filings = str
         self.filers_name = []
@@ -133,20 +133,18 @@ class LogAnalytics:
         
             for line in call.splitlines():
                 # check if iterated line exists in state's list. Then append it in sequence list
+
+                # get the phone number
                 if "Incoming:" in line:
                     number = line.split(" ")[1]
                 
-                if line in self.state_str:   
+                if line in self.state_str:  
+                    line = line.replace("-","")
+                    line = line.replace("playing","")
+                    line = line.strip()  
                     state_seq_call.append(line.lower())
-                
-                news = []
-                for states in state_seq_call:
-                    if '------------ playing' in states:
-                        states = states.replace("-","")
-                        states = states.replace("playing","")
-                        states = states.strip() 
-                        news.append(states)
-                        self.new_dict[number] = news  
+
+            self.new_dict[number] = state_seq_call 
 
 
     def countValidCalls(self):

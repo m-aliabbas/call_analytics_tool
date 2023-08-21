@@ -25,7 +25,7 @@ class LogInterface:
         self.log_processor = LogAnalytics()
         self.DB = Mongo_DB(address='mongodb://localhost:27017/',
                  db_name='call_analytics_tool',
-                 collection_name='log_record27',)
+                 collection_name='log_record32',)
 
     
     def insert_to_db(self,file_name):
@@ -265,7 +265,12 @@ class LogInterface:
             dicts['total_calls'] = total_calls
             dicts['valid_calls'] = valid_calls
 
-            last_items = [values[-1] for values in states_number[0].values() if values]
+            last_items = []
+            
+            for item in states_number:
+                for values in item.values():
+                    if values:  # Checks if the list is not empty
+                        last_items.append(values[-1])
 
             count = Counter(last_items)
 
@@ -364,7 +369,7 @@ class LogInterface:
         # print(data_response)
         return data_response
 
-# files_name = ["7C-D3-0A-1A-C3-C4_1676679530.txt"]
+# files_name = ["7C-D3-0A-1A-C3-C4_1676679530.txt","7C-D3-0A-1A-C3-56_1676588618.txt","7C-D3-0A-1A-C3-78_1676679544.txt","7C-D3-0A-1A-D3-A5_1676666312.txt"]
 # logsinterface = LogInterface()
 # logsinterface.insert_to_db(files_name)
 # logsinterface.get_none_responsis_pharase_freq()
