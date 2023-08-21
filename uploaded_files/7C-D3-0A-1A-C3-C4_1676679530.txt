@@ -1,4 +1,4 @@
-  **************************************************
+**************************************************
                    Prime FE BOT                   
                         by                        
                     Wurfel-IT                     
@@ -335,7 +335,7 @@ AI bot level= 2 : None
 State = -1
 AI bot got this data = that's the thing path both and kids
 AI bot level= 1 : None
-State = -1  
+State = -1
 ----------------- playing intro ------------------
 -------------------- Hang Up ---------------------
 Disposition = NP with slowing 2 sec
@@ -122586,7 +122586,9 @@ call ended!!!
 Incoming: (620)213-0472 UID: V2132019250015369688  
 ***************** Starting Call ******************
 ----------------- playing hello ------------------
-{"partial" : ""} 0
+{
+  "partial" : ""
+} 0
 {
   "partial" : ""
 } 1
