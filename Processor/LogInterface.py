@@ -120,7 +120,7 @@ class LogInterface:
                                  'number_data':merged_dict
                                  }
         }
-        return data
+        return complete_data
     
 
     def get_complete_data(self,):
