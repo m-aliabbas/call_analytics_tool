@@ -101,7 +101,6 @@ class LogInterface:
             file_id = data_list.get('file_id', None)
             if not file_id:
                 continue
-
             # Using the 'get' method to safely access dictionary keys
             states_number.append(data_list.get('states_number', {}).get(file_id, {}))
             total_calls += data_list.get('total_calls', 0)
@@ -147,10 +146,10 @@ class LogInterface:
                 'states': States_new[:min_number]
             }
         }
-        
+
         return complete_data
     
-    
+
     def get_complete_data(self,):
         data = self.DB.find()
         data_lists = data
