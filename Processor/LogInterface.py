@@ -146,8 +146,17 @@ class LogInterface:
                 'states': States_new[:min_number]
             }
         }
+        df = pd.DataFrame(complete_data['disposition_table'])
+        
+        if state != 'all':
+            # Select rows where the last value of the list in 'states' column is 'pitch opt'
+            selected_rows = df[df['states'].apply(lambda x: x[-1] if x else None) == state]
 
-        return complete_data
+            # Convert the selected rows to dictionary
+            dict_representation = selected_rows.to_dict()
+            complete_data['disposition_table'] = dict_representation
+        
+        return complete_data   
     
 
     def get_complete_data(self,):
