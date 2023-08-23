@@ -169,6 +169,7 @@ def get_full_data():
     data = {'data': data}
     json_data = parse_json(data)
     return json_data
+    
 
 @app.get("/get_new_data")
 def get_new_data():
@@ -186,9 +187,9 @@ def get_most_phrases():
     json_data = parse_json(data)
     return json_data
 
-@app.get("/get_all_logs")
-def get_all_logs():
-    data=LogInterface.get_all_logs()
+@app.get("/get_all_logs/{state}")
+def get_all_logs(state:str):
+    data=LogInterface.get_all_logs(state)
 
     data = {'data': data}
     json_data = parse_json(data)
@@ -207,6 +208,14 @@ def get_most_common():
 def get_all_states():
     # write a method for it in log interface
     data = LogInterface.get_states()
+    data = {'data': data}
+    json_data = parse_json(data)
+    return json_data
+
+@app.get("/get_new_states")
+def get_new_states():
+    # write a method for it in log interface
+    data = LogInterface.get_new_states()
     data = {'data': data}
     json_data = parse_json(data)
     return json_data

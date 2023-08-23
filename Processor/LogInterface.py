@@ -25,7 +25,7 @@ class LogInterface:
         self.log_processor = LogAnalytics()
         self.DB = Mongo_DB(address='mongodb://localhost:27017/',
                  db_name='call_analytics_tool',
-                 collection_name='log_record27',)
+                 collection_name='log_record32',)
 
     
     def insert_to_db(self,file_name):
@@ -79,9 +79,14 @@ class LogInterface:
         return data
     
 
-    def get_all_logs(self,):
-        data = self.DB.find()
-        data_lists = data
+    def get_all_logs(self, state):
+        # Fetching data from the database
+        data_lists = self.DB.find()
+        
+        # Converting the state to lowercase
+        state = state.lower()
+        
+        # Initializing counters and lists
         total_calls = 0
         valid_calls = 0
         call_drop = 0
@@ -90,37 +95,68 @@ class LogInterface:
         Disposition_List = []
         File_ID_List = []
         states_number = []
+        
+        # Iterating over the fetched data
         for data_list in data_lists:
-            file_id = data_list['file_id']
-            states_number.append(data_list['states_number'][file_id])
-            total_calls += data_list['total_calls']
-            valid_calls += data_list['valid_calls']
-            call_drop += data_list['call_drop']
-            # print(data_list['Disposition'][figet_all_logsle_id])
-            Caller_ID_List += data_list['Caller_ID'][file_id]
-            Transcript_List += data_list['Transcript'][file_id]
-            Disposition_List += data_list['Disposition'][file_id]
-            temp = []
-            # print(file_id,len(data_list['Disposition'][file_id]),len(data_list['Transcript'][file_id]),len(data_list['Caller_ID'][file_id]),)
-            File_ID_List += [os.path.basename(file_id)[:-4]]*len(data_list['Caller_ID'][file_id])
+            file_id = data_list.get('file_id', None)
+            if not file_id:
+                continue
+            # Using the 'get' method to safely access dictionary keys
+            states_number.append(data_list.get('states_number', {}).get(file_id, {}))
+            total_calls += data_list.get('total_calls', 0)
+            valid_calls += data_list.get('valid_calls', 0)
+            Caller_ID_List += data_list.get('Caller_ID', {}).get(file_id, [])
+            Transcript_List += data_list.get('Transcript', {}).get(file_id, [])
+            Disposition_List += data_list.get('Disposition', {}).get(file_id, [])
+            File_ID_List += [os.path.basename(file_id)[:-4]] * len(data_list.get('Caller_ID', {}).get(file_id, []))
+        
+        last_items = []
+        for item in states_number:
+            for values in item.values():
+                if values:  
+                    last_items.append(values[-1])
+        count = Counter(last_items)
+        
+        if state == 'all':
+            call_drop = sum(count.values())
+        else:
+            call_drop = count.get(state, 0)
+
+        # Merging the state numbers
         merged_dict = {}
         for d in states_number:
             merged_dict.update(d)
-        # this is not a perfect thing; Only adding because of less usecase
-        min_number = min(len(Caller_ID_List),len(Disposition_List),len(Transcript_List),len(File_ID_List))
 
+        States_new = [merged_dict.get(number, None) for number in Caller_ID_List]
+        
+        # Ensuring all lists are of the same length
+        min_number = min(len(Caller_ID_List), len(Disposition_List), len(Transcript_List), len(File_ID_List), len(States_new))
+
+        
+        # Constructing the final data structure to be returned
         complete_data = {
-            'total_calls':total_calls,
-            'valid_calls':valid_calls,
-            'call_drop' : call_drop,
-            'disposition_table':{'caller_id':Caller_ID_List[:min_number],
-                                 'transcript':Transcript_List[:min_number],
-                                 'disposition':Disposition_List[:min_number],
-                                 'file_id':File_ID_List[:min_number],
-                                 'number_data':merged_dict
-                                 }
+            'total_calls': total_calls,
+            'valid_calls': valid_calls,
+            'call_drop': call_drop,
+            'disposition_table': {
+                'caller_id': Caller_ID_List[:min_number],
+                'transcript': Transcript_List[:min_number],
+                'disposition': Disposition_List[:min_number],
+                'file_id': File_ID_List[:min_number],
+                'states': States_new[:min_number]
+            }
         }
-        return data
+        df = pd.DataFrame(complete_data['disposition_table'])
+        
+        if state != 'all':
+            # Select rows where the last value of the list in 'states' column is 'pitch opt'
+            selected_rows = df[df['states'].apply(lambda x: x[-1] if x else None) == state]
+
+            # Convert the selected rows to dictionary
+            dict_representation = selected_rows.to_dict()
+            complete_data['disposition_table'] = dict_representation
+        
+        return complete_data   
     
 
     def get_complete_data(self,):
@@ -241,6 +277,42 @@ class LogInterface:
         return data_response
 
 
+    def get_new_states(self):
+        data = self.DB.find({},)
+        try:
+            data_lists = data
+            states_number = []
+            for data_list in data_lists:
+                file_id = data_list['file_id']
+                states_number.append(data_list['states_number'][file_id])
+            # data_response = {"status":True,"data":new_list,"msg":"data got"}
+
+            for state in states_number:
+                # Using a set to store unique values
+                unique_values = set()
+
+                for key, value_list in state.items():
+                    for item in value_list:
+                        unique_values.add(item)
+
+                # Convert set to list
+                unique_list = list(unique_values)
+
+                unique_list = sorted(unique_list)
+                # Insert a value at the beginning of the list
+                value_to_insert_first = 'all'
+                unique_list.insert(0, value_to_insert_first)
+                
+
+
+            data_response = {"status":True,"data":unique_list,"msg":"data got"}
+
+        except Exception as e:
+            data_response = {"status":False,"data":[],"msg":f"You got the error {e}"}
+
+        return data_response
+
+
     def word_counts(self,text):
         return len(text.split(' '))
 
@@ -265,7 +337,12 @@ class LogInterface:
             dicts['total_calls'] = total_calls
             dicts['valid_calls'] = valid_calls
 
-            last_items = [values[-1] for values in states_number[0].values() if values]
+            last_items = []
+            
+            for item in states_number:
+                for values in item.values():
+                    if values:  # Checks if the list is not empty
+                        last_items.append(values[-1])
 
             count = Counter(last_items)
 
@@ -364,7 +441,7 @@ class LogInterface:
         # print(data_response)
         return data_response
 
-# files_name = ["7C-D3-0A-1A-C3-C4_1676679530.txt"]
+# files_name = ["7C-D3-0A-1A-C3-C4_1676679530.txt","7C-D3-0A-1A-C3-56_1676588618.txt","7C-D3-0A-1A-C3-78_1676679544.txt","7C-D3-0A-1A-D3-A5_1676666312.txt"]
 # logsinterface = LogInterface()
 # logsinterface.insert_to_db(files_name)
 # logsinterface.get_none_responsis_pharase_freq()
