@@ -25,7 +25,7 @@ class LogInterface:
         self.log_processor = LogAnalytics()
         self.DB = Mongo_DB(address='mongodb://localhost:27017/',
                  db_name='call_analytics_tool',
-                 collection_name='log_record32',)
+                   collection_name='log_record32',)
 
     
     def insert_to_db(self,file_name):
@@ -239,8 +239,14 @@ class LogInterface:
             # Extract and flatten all 'Transcript' values
             all_phrases = [phrase for record in [entry['Disposition'] for entry in data] for value in record.values() for phrase in value]
             
+            result = []
+
+            for record in data:
+                for value in record['Disposition'].values():
+                    for phrase in value:
+                        result.append(phrase)
             # Sort phrases by their counts
-            word_counts = self.count_words(all_phrases)
+            word_counts = self.count_words(result)
 
             # Return the result
             data_response = {"status": True, "data": word_counts, "msg": "data got"}
