@@ -79,6 +79,10 @@ class LogInterface:
         return data
     
 
+    def count_words(self,word_list):
+        return dict(Counter(word_list))
+    
+
     def get_all_logs(self, state):
         # Fetching data from the database
         data_lists = self.DB.find()
@@ -155,8 +159,17 @@ class LogInterface:
             # Convert the selected rows to dictionary
             dict_representation = selected_rows.to_dict()
             complete_data['disposition_table'] = dict_representation
-        
-        return complete_data   
+            complete_data['disposition_table']['caller_id'] = list(complete_data['disposition_table']['caller_id'] .values())
+            complete_data['disposition_table']['transcript'] = list(complete_data['disposition_table']['transcript'] .values())
+            complete_data['disposition_table']['disposition'] = list(complete_data['disposition_table']['disposition'] .values())
+            complete_data['disposition_table']['file_id'] = list(complete_data['disposition_table']['file_id'] .values())
+            complete_data['disposition_table']['states'] = list(complete_data['disposition_table']['states'] .values())
+
+            word_counts = self.count_words(complete_data['disposition_table']['disposition'])
+            
+            complete_data['disposition_table']['disposition_freq']  = word_counts
+
+        return complete_data
     
 
     def get_complete_data(self,):
@@ -229,16 +242,11 @@ class LogInterface:
         return data_response
     
     
-    def count_words(self,word_list):
-        return dict(Counter(word_list))
-    
+
 
     def get_disposition_freq(self,):
         data = self.DB.find({},)
         try:
-            # Extract and flatten all 'Transcript' values
-            all_phrases = [phrase for record in [entry['Disposition'] for entry in data] for value in record.values() for phrase in value]
-            
             result = []
 
             for record in data:
