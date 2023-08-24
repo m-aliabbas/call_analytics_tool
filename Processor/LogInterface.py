@@ -151,6 +151,10 @@ class LogInterface:
             }
         }
         df = pd.DataFrame(complete_data['disposition_table'])
+
+        word_counts = self.count_words(complete_data['disposition_table']['disposition'])
+            
+        complete_data['disposition_table']['disposition_freq']  = word_counts
         
         if state != 'all':
             # Select rows where the last value of the list in 'states' column is 'pitch opt'
