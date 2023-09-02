@@ -314,9 +314,12 @@ class LogAnalytics:
         number_trans = []
         number_dis   = []
         numbers = []
+        dict_trans = {}
+        dict_dis = {}
+        dict_state = {}
        
         for call_index,call in enumerate(self.calls):
-
+            state_seq_call = []
             number_transcript = [] #every time we make a transcript list
             if "AI bot got this data =" in call and "Incoming:" in call and "Disposition =" in call:
                 splited_lines = call.splitlines()
@@ -328,16 +331,28 @@ class LogAnalytics:
                     if "AI bot got this data =" in line:
                         text = line.split("=")[1]
                         number_transcript.append(text)
+                        dict_trans[number] = text
+                        
                     if  "Disposition =" in line:
                         disposition = line.split("=")[1]
                         disposition = disposition[:-19] # remove the line containing slowing with 2sec etc (By. ALI)
                         number_dis.append(disposition)
+                        dict_dis[number] = disposition
+
+                    if line in self.state_str:  
+                        line = line.replace("-","")
+                        line = line.replace("playing","")
+                        line = line.strip()  
+                        state_seq_call.append(line.lower())
+
+                dict_state[number] = state_seq_call
+                self.new_dict[number] = state_seq_call 
                 
                 number_trans.append(number_transcript[0]) # getting only first Index of Transcript list
 
         # Display in One Dataframe
         try:
-            df_number_data = {"file_id":self.filings,"Caller_ID":{self.filings:numbers}, "Transcript":{self.filings:number_trans},"states_number":{self.filings:self.new_dict}, "Disposition":{self.filings:number_dis}, "AI None Separater":{self.filings:self.mergerd_dict}, "total_calls":self.total_calls, "valid_calls":self.valid_calls, "total_states": self.count_class, "call_drop": self.call_drop }
+            df_number_data = {"file_id":self.filings,"Caller_ID":{self.filings:numbers}, "Transcript":{self.filings:dict_trans},"states_number":{self.filings:dict_state}, "Disposition":{self.filings:dict_dis}, "AI None Separater":{self.filings:self.mergerd_dict}, "total_calls":self.total_calls, "valid_calls":self.valid_calls, "total_states": self.count_class, "call_drop": self.call_drop }
             self.number_data = df_number_data       
         except:
             pass 

@@ -25,7 +25,7 @@ class LogInterface:
         self.log_processor = LogAnalytics()
         self.DB = Mongo_DB(address='mongodb://localhost:27017/',
                  db_name='call_analytics_tool',
-                   collection_name='log_record32',)
+                   collection_name='log_record34',)
 
     
     def insert_to_db(self,file_name):
@@ -81,7 +81,7 @@ class LogInterface:
 
     def count_words(self,word_list):
         return dict(Counter(word_list))
-    
+        
 
     def get_all_logs(self, state):
         # Fetching data from the database
@@ -107,11 +107,14 @@ class LogInterface:
                 continue
             # Using the 'get' method to safely access dictionary keys
             states_number.append(data_list.get('states_number', {}).get(file_id, {}))
+            Transcript_List.append(data_list.get('Transcript', {}).get(file_id, {}))
+            Disposition_List.append(data_list.get('Disposition', {}).get(file_id, {}))
+            Caller_ID_List.append(data_list.get('Caller_ID', {}).get(file_id, {}))
             total_calls += data_list.get('total_calls', 0)
             valid_calls += data_list.get('valid_calls', 0)
-            Caller_ID_List += data_list.get('Caller_ID', {}).get(file_id, [])
-            Transcript_List += data_list.get('Transcript', {}).get(file_id, [])
-            Disposition_List += data_list.get('Disposition', {}).get(file_id, [])
+            # Caller_ID_List += data_list.get('Caller_ID', {}).get(file_id, [])
+            # Transcript_List += data_list.get('Transcript', {}).get(file_id, [])
+            # Disposition_List += data_list.get('Disposition', {}).get(file_id, [])
             File_ID_List += [os.path.basename(file_id)[:-4]] * len(data_list.get('Caller_ID', {}).get(file_id, []))
         
         last_items = []
@@ -127,37 +130,61 @@ class LogInterface:
             call_drop = count.get(state, 0)
 
         # Merging the state numbers
-        merged_dict = {}
+        merged_dict_1 = {}
         for d in states_number:
-            merged_dict.update(d)
+            merged_dict_1.update(d)
 
-        States_new = [merged_dict.get(number, None) for number in Caller_ID_List]
+        merged_dict_2 = {}
+        for d in Transcript_List:
+            merged_dict_2.update(d)
+
+        merged_dict_3 = {}
+        for d in Disposition_List:
+            merged_dict_3.update(d)
+
+        States_new = []
+        trans_new = []
+        dispos_new = []
+        number_new = []
+        for number in Caller_ID_List[0]:    
+            stating = merged_dict_1.get(number, None)
+            trans = merged_dict_2.get(number, None)
+            dispos = merged_dict_3.get(number, None)
+
+            if stating == None or trans == None or dispos == None:
+                continue
+            else: 
+                number_new.append(number)
+                States_new.append(stating)
+                trans_new.append(trans)
+                dispos_new.append(dispos)
         
+
         # Ensuring all lists are of the same length
-        min_number = min(len(Caller_ID_List), len(Disposition_List), len(Transcript_List), len(File_ID_List), len(States_new))
+        min_number = min(len(number_new), len(dispos_new), len(trans_new), len(File_ID_List), len(States_new))
 
-        
         # Constructing the final data structure to be returned
         complete_data = {
             'total_calls': total_calls,
             'valid_calls': valid_calls,
             'call_drop': call_drop,
             'disposition_table': {
-                'caller_id': Caller_ID_List[:min_number],
-                'transcript': Transcript_List[:min_number],
-                'disposition': Disposition_List[:min_number],
+                'caller_id': number_new,
+                'transcript': trans_new,
+                'disposition': dispos_new,
                 'file_id': File_ID_List[:min_number],
-                'states': States_new[:min_number]
+                'states': States_new
             }
         }
         df = pd.DataFrame(complete_data['disposition_table'])
+
 
         word_counts = self.count_words(complete_data['disposition_table']['disposition'])
             
         complete_data['disposition_table']['disposition_freq']  = word_counts
         
         if state != 'all':
-            # Select rows where the last value of the list in 'states' column is 'pitch opt'
+            # Select rows where the last value of the list in 'states' column is given state
             selected_rows = df[df['states'].apply(lambda x: x[-1] if x else None) == state]
 
             # Convert the selected rows to dictionary
@@ -246,8 +273,6 @@ class LogInterface:
         return data_response
     
     
-
-
     def get_disposition_freq(self,):
         data = self.DB.find({},)
         try:
