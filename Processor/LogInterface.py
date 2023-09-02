@@ -117,17 +117,6 @@ class LogInterface:
             # Disposition_List += data_list.get('Disposition', {}).get(file_id, [])
             File_ID_List += [os.path.basename(file_id)[:-4]] * len(data_list.get('Caller_ID', {}).get(file_id, []))
         
-        last_items = []
-        for item in states_number:
-            for values in item.values():
-                if values:  
-                    last_items.append(values[-1])
-        count = Counter(last_items)
-        
-        if state == 'all':
-            call_drop = sum(count.values())
-        else:
-            call_drop = count.get(state, 0)
 
         # Merging the state numbers
         merged_dict_1 = {}
@@ -159,6 +148,18 @@ class LogInterface:
                 trans_new.append(trans)
                 dispos_new.append(dispos)
         
+
+        last_values = []
+
+        for sublist in States_new:
+            if sublist:  # Check if the sublist is not empty
+                last_values.append(sublist[-1])
+        count = Counter(last_values)
+
+        if state == 'all':
+            call_drop = sum(count.values())
+        else:
+            call_drop = count.get(state, 0)
 
         # Ensuring all lists are of the same length
         min_number = min(len(number_new), len(dispos_new), len(trans_new), len(File_ID_List), len(States_new))
