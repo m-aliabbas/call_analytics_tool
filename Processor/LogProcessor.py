@@ -38,7 +38,7 @@ class LogAnalytics:
         self.filings = str
         self.filers_name = []
         self.splitted_calls_3 = []
-        self.path = "/home/idrak/Desktop/idrak_work/call_analytics_tool/uploaded_files/"
+        self.path = "E://Python Practice//call_analytics_tool//uploaded_files//"
         #put keywrods here
         self.state_dict = {
             "playing hello": "hello",

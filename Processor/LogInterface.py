@@ -130,9 +130,7 @@ class LogInterface:
         merged_dict_3 = {}
         for d in Disposition_List:
             merged_dict_3.update(d)
-        
 
-        print(len(states_number),len(Disposition_List),len(Transcript_List),)
         States_new = []
         trans_new = []
         dispos_new = []
@@ -143,15 +141,14 @@ class LogInterface:
             dispos = merged_dict_3.get(number, None)
 
             if stating == None or trans == None or dispos == None:
-                print(stating,trans,dispos)
+                continue
             else: 
-                
                 number_new.append(number)
                 States_new.append(stating)
                 trans_new.append(trans)
                 dispos_new.append(dispos)
         
-        print(len(number_new),len(States_new),len(dispos_new),len(trans_new),)
+
         last_values = []
 
         for sublist in States_new:
