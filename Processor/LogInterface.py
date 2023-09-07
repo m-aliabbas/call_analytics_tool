@@ -100,53 +100,84 @@ class LogInterface:
         File_ID_List = []
         states_number = []
         
-        # Iterating over the fetched data
+        # Iterate through a list of dictionaries called data_lists
         for data_list in data_lists:
+            # Get the 'file_id' value from the current dictionary; default to None if not found
             file_id = data_list.get('file_id', None)
+
+            # If 'file_id' is None, skip this iteration
             if not file_id:
                 continue
-            # Using the 'get' method to safely access dictionary keys
-            states_number.append(data_list.get('states_number', {}).get(file_id, {}))
-            Transcript_List.append(data_list.get('Transcript', {}).get(file_id, {}))
-            Disposition_List.append(data_list.get('Disposition', {}).get(file_id, {}))
-            Caller_ID_List.append(data_list.get('Caller_ID', {}).get(file_id, {}))
-            total_calls += data_list.get('total_calls', 0)
-            valid_calls += data_list.get('valid_calls', 0)
-            # Caller_ID_List += data_list.get('Caller_ID', {}).get(file_id, [])
-            # Transcript_List += data_list.get('Transcript', {}).get(file_id, [])
-            # Disposition_List += data_list.get('Disposition', {}).get(file_id, [])
-            File_ID_List += [os.path.basename(file_id)[:-4]] * len(data_list.get('Caller_ID', {}).get(file_id, []))
-        
+            else:
+                # Extract data from the dictionary and append it to respective lists
+                # Use the 'get' method to safely access dictionary keys and provide default values if they don't exist
+                states_number.append(data_list.get('states_number', {}).get(file_id, {}))
+                Transcript_List.append(data_list.get('Transcript', {}).get(file_id, {}))
+                Disposition_List.append(data_list.get('Disposition', {}).get(file_id, {}))
+                Caller_ID_List.append(data_list.get('Caller_ID', {}).get(file_id, {}))
 
-        # Merging the state numbers
+                # Increment total_calls and valid_calls with values from the dictionary, default to 0 if not found
+                total_calls += data_list.get('total_calls', 0)
+                valid_calls += data_list.get('valid_calls', 0)
+
+                # Generate a list of File IDs and add it to File_ID_List
+                # The list is created by repeating the base file ID without the extension for the length of the Caller_ID list
+                File_ID_List += [os.path.basename(file_id)[:-4]] * len(data_list.get('Caller_ID', {}).get(file_id, []))
+
+        
+        # Caller_ID_List = [item for sublist in Caller_ID_List for item in sublist]
+        # Transcript_List = [item for sublist in Transcript_List for item in sublist]
+        # Disposition_List = [item for sublist in Disposition_List for item in sublist]
+        # states_number = [item for sublist in states_number for item in sublist]
+
+    
+        # Merge dictionaries from lists into separate merged dictionaries.
+
+        # Initialize empty dictionaries to hold merged key-value pairs from respective lists.
         merged_dict_1 = {}
+        merged_dict_2 = {}
+        merged_dict_3 = {}
+
+        # Iterate through lists of dictionaries and update merged dictionaries.
         for d in states_number:
             merged_dict_1.update(d)
 
-        merged_dict_2 = {}
         for d in Transcript_List:
             merged_dict_2.update(d)
 
-        merged_dict_3 = {}
         for d in Disposition_List:
             merged_dict_3.update(d)
 
+        # Now, merged_dict_1, merged_dict_2, and merged_dict_3 contain merged key-value pairs from their respective lists.
+
+
+        # Initialize empty lists to store new data after filtering based on Caller_ID numbers.
         States_new = []
         trans_new = []
         dispos_new = []
         number_new = []
-        for number in Caller_ID_List[0]:    
-            stating = merged_dict_1.get(number, None)
-            trans = merged_dict_2.get(number, None)
-            dispos = merged_dict_3.get(number, None)
 
-            if stating == None or trans == None or dispos == None:
-                continue
-            else: 
-                number_new.append(number)
-                States_new.append(stating)
-                trans_new.append(trans)
-                dispos_new.append(dispos)
+        # Iterate through Caller_ID numbers from the caller id list
+        for list in Caller_ID_List:
+            # Iterate through all the Caller_ID numbers
+            for number in list:    
+                # Retrieve corresponding data from merged dictionaries based on Caller_ID number.
+                stating = merged_dict_1.get(number, None)
+                trans = merged_dict_2.get(number, None)
+                dispos = merged_dict_3.get(number, None)
+
+                # Check if any of the data is missing (None), and if so, skip this iteration.
+                if stating is None or trans is None or dispos is None:
+                    continue
+                else:
+                    # If all data is available, add the Caller_ID number and associated data to the respective lists.
+                    number_new.append(number)
+                    States_new.append(stating)
+                    trans_new.append(trans)
+                    dispos_new.append(dispos)
+
+            # After the loop, States_new, trans_new, dispos_new, and number_new contain filtered and matched data.
+
         
 
         last_values = []
@@ -179,7 +210,7 @@ class LogInterface:
         }
         df = pd.DataFrame(complete_data['disposition_table'])
 
-
+        
         word_counts = self.count_words(complete_data['disposition_table']['disposition'])
             
         complete_data['disposition_table']['disposition_freq']  = word_counts
@@ -187,15 +218,14 @@ class LogInterface:
         if state != 'all':
             # Select rows where the last value of the list in 'states' column is given state
             selected_rows = df[df['states'].apply(lambda x: x[-1] if x else None) == state]
-
             # Convert the selected rows to dictionary
             dict_representation = selected_rows.to_dict()
             complete_data['disposition_table'] = dict_representation
-            complete_data['disposition_table']['caller_id'] = list(complete_data['disposition_table']['caller_id'] .values())
-            complete_data['disposition_table']['transcript'] = list(complete_data['disposition_table']['transcript'] .values())
-            complete_data['disposition_table']['disposition'] = list(complete_data['disposition_table']['disposition'] .values())
-            complete_data['disposition_table']['file_id'] = list(complete_data['disposition_table']['file_id'] .values())
-            complete_data['disposition_table']['states'] = list(complete_data['disposition_table']['states'] .values())
+            complete_data['disposition_table']['caller_id'] = complete_data['disposition_table']['caller_id'].values()
+            complete_data['disposition_table']['transcript'] = complete_data['disposition_table']['transcript'] .values()
+            complete_data['disposition_table']['disposition'] = complete_data['disposition_table']['disposition'] .values()
+            complete_data['disposition_table']['file_id'] = complete_data['disposition_table']['file_id'] .values()
+            complete_data['disposition_table']['states'] = complete_data['disposition_table']['states'] .values()
 
             word_counts = self.count_words(complete_data['disposition_table']['disposition'])
             
