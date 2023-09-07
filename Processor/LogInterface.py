@@ -445,8 +445,8 @@ class LogInterface:
                     key = list(data[i]['AI None Separater'].keys())[0]
                     df_temp1 = pd.DataFrame(data[i]['AI None Separater'][key])
                     df_list.append(df_temp1)
-            df_concat = pd.concat(df_list)
-            df_temp = pd.concat([df_temp,df_concat])
+                df_concat = pd.concat(df_list)
+                df_temp = pd.concat([df_temp,df_concat])
             df_temp['length'] = df_temp['AI bot got this data'].apply(self.word_counts)
             if not direct_flag:
                 df_temp= df_temp[df_temp['length']>=3]
