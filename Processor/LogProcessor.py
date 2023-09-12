@@ -33,7 +33,8 @@ class LogAnalytics:
         self.state_seq = []
         self.trans_list = []
         self.transcripts = []
-        self.state_keywords = ['ello', 'ntro', 'nterested', 'AGE','transferring call', 'Age', 'ransfer', 'achine', 'reeting', 'reetings', 'itch', 'OPT', 'arrier', 'panish', 'DNC', 'dnc', 'busy', 'Busy', 'ositive', 'egative', 'XFER', 'ualifies', 'ualified']
+        # self.state_keywords = ['ello', 'ntro', 'nterested', 'AGE','transferring call', 'Age', 'ransfer', 'achine', 'reeting', 'reetings', 'itch', 'OPT', 'arrier', 'panish', 'DNC', 'dnc', 'busy', 'Busy', 'ositive', 'egative', 'XFER', 'ualifies', 'ualified']
+        self.state_keywords = ['ello', 'ntro', 'AGE','transferring call', 'Age', 'ransfer', 'reeting', 'reetings', 'itch', 'OPT',]
         self.number_data = {}
         self.filings = str
         self.filers_name = []
