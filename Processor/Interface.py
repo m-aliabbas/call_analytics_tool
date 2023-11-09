@@ -25,7 +25,7 @@ class Interface:
     
     def get_diarizer_server_response(self,file_path):
         # Specify the URL of the FastAPI server
-        url = 'http://110.93.240.107:8080/uploadfile/'
+        url = 'http://127.0.0.1:8000/uploadfile/'
         files = {'file': (file_path, open(file_path, 'rb'), 'audio/wav')}
 
         # Send a POST request to the FastAPI server with the file data
