@@ -71,7 +71,7 @@ def get_particular(file_id: str):
 
 def get_diarizer_server_response(self,file_path):
     # Specify the URL of the FastAPI server
-    url = 'http://110.93.240.107:8080/uploadfile/'
+    url = 'http://110.93.240.107:8880/uploadfile/'
     files = {'file': (file_path, open(file_path, 'rb'), 'audio/wav')}
 
     # Send a POST request to the FastAPI server with the file data
@@ -124,6 +124,7 @@ async def create_upload_files(files: List[UploadFile] = File(...)):
 
         new_file_list = zip_extractor_1(file_path)
         new_file_list.pop(0)
+        interface.empty_db()
         for path in new_file_list:
             status,msg = interface.get_diarizer_response(path)
             print(msg)
@@ -155,7 +156,6 @@ def save_uploaded_file(file: UploadFile) -> str:
     file_path = os.path.join(upload_dir, filename)
     with open(file_path, "wb") as f:
         f.write(file.file.read())
-
     return file_path
 
 

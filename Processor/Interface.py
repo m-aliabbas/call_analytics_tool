@@ -25,7 +25,7 @@ class Interface:
     
     def get_diarizer_server_response(self,file_path):
         # Specify the URL of the FastAPI server
-        url = 'http://127.0.0.1:8000/uploadfile/'
+        url = 'http://192.168.100.100:8880/uploadfile/'
         files = {'file': (file_path, open(file_path, 'rb'), 'audio/wav')}
 
         # Send a POST request to the FastAPI server with the file data
@@ -72,6 +72,15 @@ class Interface:
                 return True, 'Data Added successfully'
             else:
                 return False,'Something went wrong'
+            
+    def empty_db(self,):
+        temp = self.DB.empty()
+        if temp:
+            print('Eliminated')
+            return True, 'Data Eliminated successfully'
+        else:
+            print('Error')
+            return False,'Something went wrong'
 
     def get_complete_data(self):
         data = self.DB.find()

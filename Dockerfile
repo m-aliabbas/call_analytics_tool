@@ -13,8 +13,8 @@ RUN pip install -r requirements.txt
 # Copy the rest of the application code into the container
 COPY . .
 
-# Expose the port your FastAPI application will run on
-EXPOSE 8000
+# Expose port 9000 for your FastAPI application
+EXPOSE 9000
 
-# Command to run your FastAPI application
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
+# Command to run your FastAPI application on port 9000
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "9000"]
