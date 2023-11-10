@@ -313,6 +313,7 @@ async def create_log_upload_files(files: List[UploadFile] = File(...)):
 
         new_file_list = zip_extractor(file_path)
         new_file_list.pop(0)
+        print("data:", new_file_list)
         LogInterface.empty_db()
         for path in new_file_list:
             status,msg = LogInterface.insert_to_db([path])
